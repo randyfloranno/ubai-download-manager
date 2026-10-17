@@ -75,7 +75,13 @@ pub fn run() -> Result<(), String> {
         )?;
     }
     ext::copy_dir(&root.join("docs"), &out.join("docs"))?;
-    for f in ["README.md", "ROADMAP.md", "ATTRIBUTION.md"] {
+    for f in [
+        "README.md",
+        "ROADMAP.md",
+        "ATTRIBUTION.md",
+        "LICENSE-MIT",
+        "LICENSE-APACHE",
+    ] {
         let src = root.join(f);
         if src.is_file() {
             copy(&src, &out.join(f))?;

@@ -14,3 +14,7 @@ cargo xtask dist
 ```
 
 Perintah ini membangun `udm`, `udm-cli`, dan `udm-native-host` dalam mode rilis tanpa fitur pengembang `--sample`, membangun ekstensi peramban, lalu mengumpulkan semuanya beserta dokumentasi dan lisensi pihak ketiga di `target/dist/udm-<versi>-<os>-<arsitektur>/`. Installer dan penandatanganan kode belum tersedia.
+
+## Lisensi
+
+UDM berlisensi ganda: lisensi MIT (`LICENSE-MIT`) atau Apache License 2.0 (`LICENSE-APACHE`), sesuai pilihan Anda. Aset pihak ketiga tercantum di `ATTRIBUTION.md`; lisensi crate pihak ketiga dikumpulkan oleh `cargo xtask licences`.

@@ -14,3 +14,7 @@ cargo xtask dist
 ```
 
 This builds `udm`, `udm-cli` and `udm-native-host` in release mode without the developer `--sample` feature, builds the browser extension, and collects everything with the docs and third-party licences in `target/dist/udm-<version>-<os>-<arch>/`. Installers and code signing are not provided yet.
+
+## Licence
+
+UDM is dual-licensed under the MIT licence (`LICENSE-MIT`) or the Apache License 2.0 (`LICENSE-APACHE`), at your option. Third-party assets are listed in `ATTRIBUTION.md`; third-party crate licences are collected by `cargo xtask licences`.
