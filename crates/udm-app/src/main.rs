@@ -2,6 +2,8 @@
 //!
 //! The UI only renders engine snapshots and dispatches commands; everything
 //! else lives in the lower layers.
+// Release builds are GUI-subsystem binaries: no console window behind the app.
+#![cfg_attr(all(windows, not(debug_assertions)), windows_subsystem = "windows")]
 #![forbid(unsafe_code)]
 #![deny(
     clippy::unwrap_used,
