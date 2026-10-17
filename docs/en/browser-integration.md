@@ -17,7 +17,7 @@ cargo xtask ext        # writes extension/dist/chrome and extension/dist/firefox
 ```
 
 - Chrome/Edge: `chrome://extensions` → Developer mode → *Load unpacked* → `extension/dist/chrome`. Note the extension id.
-- Firefox: `about:debugging` → *Load Temporary Add-on* → `extension/dist/firefox/manifest.json` (id `udm@udm.dev`).
+- Firefox: `about:debugging` → *Load Temporary Add-on* → `extension/dist/firefox/manifest.json` (id `udm@randyfloranno.github.io`).
 
 ## Register the native host
 
@@ -28,15 +28,15 @@ udm-cli native-host install --extension-id <extension-id>
 udm-cli native-host uninstall
 ```
 
-This writes `dev.udm.native_host.json` and `dev.udm.native_host-firefox.json` into `<data-dir>/native-host/` and registers them for the current user (Windows: the Chrome, Edge and Firefox `NativeMessagingHosts` keys under `HKCU`; macOS/Linux: each browser's per-user `NativeMessagingHosts` folder). `--host <path>` overrides the host binary (default: next to `udm-cli`).
+This writes `io.github.randyfloranno.udm.json` and `io.github.randyfloranno.udm-firefox.json` into `<data-dir>/native-host/` and registers them for the current user (Windows: the Chrome, Edge and Firefox `NativeMessagingHosts` keys under `HKCU`; macOS/Linux: each browser's per-user `NativeMessagingHosts` folder). `--host <path>` overrides the host binary (default: next to `udm-cli`).
 
 ### Manual registration
 
-Create `dev.udm.native_host.json` next to `udm-native-host.exe`:
+Create `io.github.randyfloranno.udm.json` next to `udm-native-host.exe`:
 
 ```json
 {
-  "name": "dev.udm.native_host",
+  "name": "io.github.randyfloranno.udm",
   "description": "UDM",
   "path": "C:\\Program Files\\UDM\\udm-native-host.exe",
   "type": "stdio",
@@ -44,12 +44,12 @@ Create `dev.udm.native_host.json` next to `udm-native-host.exe`:
 }
 ```
 
-For Firefox, write a second file `dev.udm.native_host-firefox.json` with `"allowed_extensions": ["udm@udm.dev"]` instead of `allowed_origins`. Then register them (Windows):
+For Firefox, write a second file `io.github.randyfloranno.udm-firefox.json` with `"allowed_extensions": ["udm@randyfloranno.github.io"]` instead of `allowed_origins`. Then register them (Windows):
 
 ```powershell
-reg add "HKCU\Software\Google\Chrome\NativeMessagingHosts\dev.udm.native_host" /ve /t REG_SZ /d "C:\Program Files\UDM\dev.udm.native_host.json" /f
-reg add "HKCU\Software\Microsoft\Edge\NativeMessagingHosts\dev.udm.native_host" /ve /t REG_SZ /d "C:\Program Files\UDM\dev.udm.native_host.json" /f
-reg add "HKCU\Software\Mozilla\NativeMessagingHosts\dev.udm.native_host" /ve /t REG_SZ /d "C:\Program Files\UDM\dev.udm.native_host-firefox.json" /f
+reg add "HKCU\Software\Google\Chrome\NativeMessagingHosts\io.github.randyfloranno.udm" /ve /t REG_SZ /d "C:\Program Files\UDM\io.github.randyfloranno.udm.json" /f
+reg add "HKCU\Software\Microsoft\Edge\NativeMessagingHosts\io.github.randyfloranno.udm" /ve /t REG_SZ /d "C:\Program Files\UDM\io.github.randyfloranno.udm.json" /f
+reg add "HKCU\Software\Mozilla\NativeMessagingHosts\io.github.randyfloranno.udm" /ve /t REG_SZ /d "C:\Program Files\UDM\io.github.randyfloranno.udm-firefox.json" /f
 ```
 
 ## How it works

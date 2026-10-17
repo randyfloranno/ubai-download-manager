@@ -17,7 +17,7 @@ cargo xtask ext        # menulis extension/dist/chrome dan extension/dist/firefo
 ```
 
 - Chrome/Edge: `chrome://extensions` → Mode pengembang → *Load unpacked* → `extension/dist/chrome`. Catat id ekstensi.
-- Firefox: `about:debugging` → *Load Temporary Add-on* → `extension/dist/firefox/manifest.json` (id `udm@udm.dev`).
+- Firefox: `about:debugging` → *Load Temporary Add-on* → `extension/dist/firefox/manifest.json` (id `udm@randyfloranno.github.io`).
 
 ## Mendaftarkan host native
 
@@ -28,15 +28,15 @@ udm-cli native-host install --extension-id <id-ekstensi>
 udm-cli native-host uninstall
 ```
 
-Perintah ini menulis `dev.udm.native_host.json` dan `dev.udm.native_host-firefox.json` ke `<folder-data>/native-host/` lalu mendaftarkannya untuk pengguna saat ini (Windows: kunci `NativeMessagingHosts` milik Chrome, Edge, dan Firefox di `HKCU`; macOS/Linux: folder `NativeMessagingHosts` per pengguna milik tiap peramban). `--host <path>` mengganti lokasi biner host (bawaan: di samping `udm-cli`).
+Perintah ini menulis `io.github.randyfloranno.udm.json` dan `io.github.randyfloranno.udm-firefox.json` ke `<folder-data>/native-host/` lalu mendaftarkannya untuk pengguna saat ini (Windows: kunci `NativeMessagingHosts` milik Chrome, Edge, dan Firefox di `HKCU`; macOS/Linux: folder `NativeMessagingHosts` per pengguna milik tiap peramban). `--host <path>` mengganti lokasi biner host (bawaan: di samping `udm-cli`).
 
 ### Pendaftaran manual
 
-Buat `dev.udm.native_host.json` di samping `udm-native-host.exe`:
+Buat `io.github.randyfloranno.udm.json` di samping `udm-native-host.exe`:
 
 ```json
 {
-  "name": "dev.udm.native_host",
+  "name": "io.github.randyfloranno.udm",
   "description": "UDM",
   "path": "C:\\Program Files\\UDM\\udm-native-host.exe",
   "type": "stdio",
@@ -44,12 +44,12 @@ Buat `dev.udm.native_host.json` di samping `udm-native-host.exe`:
 }
 ```
 
-Untuk Firefox, tulis berkas kedua `dev.udm.native_host-firefox.json` dengan `"allowed_extensions": ["udm@udm.dev"]` sebagai pengganti `allowed_origins`. Lalu daftarkan (Windows):
+Untuk Firefox, tulis berkas kedua `io.github.randyfloranno.udm-firefox.json` dengan `"allowed_extensions": ["udm@randyfloranno.github.io"]` sebagai pengganti `allowed_origins`. Lalu daftarkan (Windows):
 
 ```powershell
-reg add "HKCU\Software\Google\Chrome\NativeMessagingHosts\dev.udm.native_host" /ve /t REG_SZ /d "C:\Program Files\UDM\dev.udm.native_host.json" /f
-reg add "HKCU\Software\Microsoft\Edge\NativeMessagingHosts\dev.udm.native_host" /ve /t REG_SZ /d "C:\Program Files\UDM\dev.udm.native_host.json" /f
-reg add "HKCU\Software\Mozilla\NativeMessagingHosts\dev.udm.native_host" /ve /t REG_SZ /d "C:\Program Files\UDM\dev.udm.native_host-firefox.json" /f
+reg add "HKCU\Software\Google\Chrome\NativeMessagingHosts\io.github.randyfloranno.udm" /ve /t REG_SZ /d "C:\Program Files\UDM\io.github.randyfloranno.udm.json" /f
+reg add "HKCU\Software\Microsoft\Edge\NativeMessagingHosts\io.github.randyfloranno.udm" /ve /t REG_SZ /d "C:\Program Files\UDM\io.github.randyfloranno.udm.json" /f
+reg add "HKCU\Software\Mozilla\NativeMessagingHosts\io.github.randyfloranno.udm" /ve /t REG_SZ /d "C:\Program Files\UDM\io.github.randyfloranno.udm-firefox.json" /f
 ```
 
 ## Cara kerja

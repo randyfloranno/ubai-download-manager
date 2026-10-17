@@ -45,6 +45,6 @@ pub use secret::Secret;
 pub use status::{DownloadStatus, PauseReason};
 
 /// Native messaging host name shared by the extension, the host and its registration.
-pub const NATIVE_HOST_NAME: &str = "dev.udm.native_host";
+pub const NATIVE_HOST_NAME: &str = "io.github.randyfloranno.udm";
 /// Firefox add-on id of the UDM extension.
-pub const FIREFOX_EXTENSION_ID: &str = "udm@udm.dev";
+pub const FIREFOX_EXTENSION_ID: &str = "udm@randyfloranno.github.io";

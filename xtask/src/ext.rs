@@ -36,7 +36,7 @@ pub fn manifest(browser: &str, version: &str) -> Value {
         if browser == "firefox" {
             obj.insert(
                 "browser_specific_settings".into(),
-                json!({ "gecko": { "id": "udm@udm.dev", "strict_min_version": "128.0" } }),
+                json!({ "gecko": { "id": "udm@randyfloranno.github.io", "strict_min_version": "128.0" } }),
             );
         }
     }
@@ -153,7 +153,10 @@ mod tests {
         let f = manifest("firefox", "0.1.0");
         assert_eq!(f["background"]["scripts"][0], "background.js");
         assert_eq!(f["background"]["type"], "module");
-        assert_eq!(f["browser_specific_settings"]["gecko"]["id"], "udm@udm.dev");
+        assert_eq!(
+            f["browser_specific_settings"]["gecko"]["id"],
+            "udm@randyfloranno.github.io"
+        );
         assert_eq!(f["permissions"].as_array().unwrap().len(), 5);
         assert!(
             c["content_security_policy"]["extension_pages"]
