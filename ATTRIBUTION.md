@@ -36,7 +36,7 @@
 | Path | Author | Source | Licence | Notes |
 |---|---|---|---|---|
 | (embedded via `eframe` → `epaint_default_fonts`) Hack Regular | Source Foundry | https://sourcefoundry.org/hack/ | MIT + Bitstream Vera licence | egui default monospace font, compiled into `udm` by the `default_fonts` feature. |
-| (embedded via `eframe` → `epaint_default_fonts`) Ubuntu Light | Dalton Maag / Canonical | https://design.ubuntu.com/font | Ubuntu Font Licence 1.0 | egui default proportional font. UFL 1.0 permits redistribution; owner to confirm it is acceptable (see `plan/STATUS.md`), otherwise replace with an OFL font. |
+| (embedded via `eframe` → `epaint_default_fonts`) Ubuntu Light | Dalton Maag / Canonical | https://design.ubuntu.com/font | Ubuntu Font Licence 1.0 | egui default proportional font. UFL 1.0 permits redistribution; accepted by the owner on 2026-10-17. The font is shipped unmodified. |
 | (embedded via `eframe` → `epaint_default_fonts`) Noto Emoji Regular | Google | https://github.com/googlefonts/noto-emoji | SIL OFL 1.1 | egui default emoji fallback. |
 | (embedded via `eframe` → `epaint_default_fonts`) emoji-icon-font | Jakub Steiner / egui contributors | https://github.com/jslegers/emoji-icon-font | SIL OFL 1.1 / MIT | egui icon glyphs. |
 
