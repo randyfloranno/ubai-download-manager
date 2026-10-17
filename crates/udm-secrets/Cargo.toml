@@ -1,0 +1,11 @@
+[package]
+name = "udm-secrets"
+description = "UDM secret storage in the OS keychain."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+udm-core.workspace = true
+keyring.workspace = true

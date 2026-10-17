@@ -1,0 +1,31 @@
+# Crate layering, checked by `cargo xtask layers`.
+# Mirrors AGENTS.md §5.8 and plan/architecture.md §1. Change only through an ADR.
+#
+# Rules:
+#   * a normal or build dependency on a workspace crate must point to a strictly lower layer (L0 < L1 < ... < L5);
+#   * `ext` crates may depend only on the crates in `[ext].allowed` (wasm-safe L0–L1);
+#   * nobody (except dev crates) depends on an `ext` crate;
+#   * `dev` crates may appear only as dev-dependencies of L0–L5/ext crates, unless an `[[exception]]` allows it;
+#   * crates in `[no_dependencies].crates` have no normal or build dependencies at all.
+
+[layers]
+L0 = ["udm-core"]
+L1 = ["udm-i18n", "udm-proto", "udm-store"]
+L2 = ["udm-net", "udm-secrets", "udm-sys"]
+L3 = ["udm-engine"]
+L4 = ["udm-control"]
+L5 = ["udm-app", "udm-cli", "udm-native-host"]
+ext = ["udm-ext"]
+dev = ["udm-testsrv", "xtask"]
+
+[ext]
+allowed = ["udm-core", "udm-i18n", "udm-proto"]
+
+[no_dependencies]
+crates = ["udm-core"]
+
+[[exception]]
+crate = "udm-app"
+dep = "udm-testsrv"
+optional = true
+reason = "dev-sample feature (--sample starts an in-process test server); off in release packaging"

@@ -1,0 +1,29 @@
+[package]
+name = "udm-engine"
+description = "UDM download engine: segments, queues, scheduler, limiter, commands."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+udm-core.workspace = true
+udm-proto.workspace = true
+udm-store.workspace = true
+udm-net.workspace = true
+udm-sys.workspace = true
+udm-secrets.workspace = true
+tokio.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+tracing.workspace = true
+bytes.workspace = true
+url.workspace = true
+
+[dev-dependencies]
+udm-testsrv.workspace = true
+udm-sys = { workspace = true, features = ["test-util"] }
+tempfile.workspace = true
+proptest.workspace = true
+tokio = { workspace = true, features = ["test-util"] }

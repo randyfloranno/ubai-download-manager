@@ -1,0 +1,57 @@
+# cargo-deny configuration (cargo-deny 0.20 format).
+# `cargo xtask deny` runs `cargo deny check licenses bans sources` when cargo-deny is installed,
+# otherwise a built-in checker that reads the same [licenses], [bans] and [sources] tables.
+# Policy: AGENTS.md §5.10 and plan/adr/0001-dependencies.md. Change only with an ADR amendment.
+
+[graph]
+all-features = true
+
+[licenses]
+# Permissive licences only. GPL, LGPL, AGPL, SSPL, MPL and "non-commercial" licences are forbidden.
+# OpenSSL is deliberately NOT allowed.
+allow = [
+    "MIT",
+    "MIT-0",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Zlib",
+    "Unicode-3.0",
+    "Unicode-DFS-2016",
+    "CC0-1.0",
+    "BSL-1.0",
+    "0BSD",
+    # Permissive data licence used by webpki-root-certs (Mozilla CA bundle).
+    "CDLA-Permissive-2.0",
+]
+confidence-threshold = 0.93
+unused-allowed-license = "allow"
+
+# Bundled egui fonts (Ubuntu-Light under the Ubuntu Font Licence, Hack/Noto/Emoji under OFL-1.1).
+# Font licences are permitted for font assets only; the fonts are listed in ATTRIBUTION.md.
+exceptions = [
+    { crate = "epaint_default_fonts", allow = ["OFL-1.1", "Ubuntu-font-1.0"] },
+]
+
+# ring 0.17.x declares `license = "Apache-2.0 AND ISC"` in its manifest, so no clarification
+# is needed. Older ring releases carried a non-SPDX licence file; if one is ever pulled in,
+# add a [[licenses.clarify]] entry here with the file hash reported by cargo-deny.
+
+[bans]
+multiple-versions = "warn"
+wildcards = "allow"
+deny = [
+    { crate = "aws-lc-rs", reason = "ADR 0001: ring is the rustls crypto provider" },
+    { crate = "aws-lc-sys", reason = "ADR 0001: ring is the rustls crypto provider" },
+    { crate = "openssl", reason = "rustls only (AGENTS.md §1)" },
+    { crate = "openssl-sys", reason = "rustls only (AGENTS.md §1)" },
+    { crate = "native-tls", reason = "rustls only (AGENTS.md §1)" },
+]
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+allow-registry = ["https://github.com/rust-lang/crates.io-index"]
+allow-git = []

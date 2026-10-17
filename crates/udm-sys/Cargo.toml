@@ -1,0 +1,22 @@
+[package]
+name = "udm-sys"
+description = "UDM OS services: disk space, pre-allocation, file writer, power, clipboard, notifications."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[features]
+default = []
+# Test helpers (`testing::FaultyWriter`, `testing::MemWriter`) for other crates' tests.
+test-util = []
+
+[dependencies]
+udm-core.workspace = true
+fs4.workspace = true
+arboard.workspace = true
+notify-rust.workspace = true
+tracing.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

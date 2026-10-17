@@ -1,0 +1,9 @@
+[package]
+name = "udm-core"
+description = "UDM core types: ids, units, limits, messages, command specs."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]

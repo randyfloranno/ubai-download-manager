@@ -1,0 +1,18 @@
+[package]
+name = "udm-proto"
+description = "UDM pure protocol logic: URLs, headers, filenames, ranges, segmentation, links."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+udm-core.workspace = true
+url.workspace = true
+percent-encoding.workspace = true
+sha2.workspace = true
+md-5.workspace = true
+base64.workspace = true
+
+[dev-dependencies]
+proptest.workspace = true

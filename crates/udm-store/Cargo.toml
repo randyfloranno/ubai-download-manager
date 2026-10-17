@@ -1,0 +1,16 @@
+[package]
+name = "udm-store"
+description = "UDM atomic storage: state, queue, settings and history files."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+udm-core.workspace = true
+serde.workspace = true
+serde_json = { workspace = true, features = ["raw_value"] }
+sha2.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true

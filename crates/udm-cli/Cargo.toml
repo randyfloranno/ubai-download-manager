@@ -1,0 +1,25 @@
+[package]
+name = "udm-cli"
+description = "UDM command-line client."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+udm-core.workspace = true
+udm-i18n.workspace = true
+udm-proto.workspace = true
+udm-store.workspace = true
+udm-secrets.workspace = true
+udm-engine.workspace = true
+udm-control.workspace = true
+tokio.workspace = true
+serde_json.workspace = true
+clap.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+udm-testsrv.workspace = true
+tokio = { workspace = true, features = ["test-util"] }
+sha2.workspace = true

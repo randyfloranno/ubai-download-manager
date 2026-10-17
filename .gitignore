@@ -1,0 +1,23 @@
+# Build output
+/target/
+
+# Agent working memory (plans, ADRs, status) — local only
+/plan/
+
+# Local dev data dirs, downloads and screenshots
+/.udm-dev/
+
+# Browser extension build output
+/extension/dist/
+
+# Incomplete downloads and temp saves produced during manual testing
+*.udmpart
+*.tmp
+
+# OS / editor noise
+Thumbs.db
+desktop.ini
+.DS_Store
+.idea/
+.vscode/
+*.swp

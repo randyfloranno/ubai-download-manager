@@ -1,0 +1,29 @@
+[package]
+name = "udm-net"
+description = "UDM networking: HTTP/1.1, HTTP/2, TLS, FTP/FTPS, proxies."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+udm-core.workspace = true
+udm-proto.workspace = true
+tokio.workspace = true
+bytes.workspace = true
+hyper.workspace = true
+hyper-util.workspace = true
+http.workspace = true
+http-body-util.workspace = true
+rustls.workspace = true
+tokio-rustls.workspace = true
+rustls-platform-verifier.workspace = true
+rustls-pki-types.workspace = true
+url.workspace = true
+sha2.workspace = true
+tracing.workspace = true
+getrandom.workspace = true
+
+[dev-dependencies]
+udm-testsrv.workspace = true
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }

@@ -1,0 +1,32 @@
+[package]
+name = "udm-testsrv"
+description = "UDM local fault-injection test server (dev only)."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lib]
+path = "src/lib.rs"
+
+[[bin]]
+name = "udm-testsrv"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { workspace = true, features = ["signal"] }
+bytes = { workspace = true }
+futures-util = { workspace = true }
+hyper = { workspace = true, features = ["server", "http1", "http2"] }
+hyper-util = { workspace = true, features = ["tokio"] }
+http = { workspace = true }
+http-body-util = { workspace = true }
+rustls = { workspace = true }
+tokio-rustls = { workspace = true }
+rustls-pki-types = { workspace = true }
+rcgen = { workspace = true }
+sha2 = { workspace = true }
+base64 = { workspace = true }
+percent-encoding = { workspace = true }
+clap = { workspace = true }
+

@@ -1,0 +1,18 @@
+[package]
+name = "udm-native-host"
+description = "UDM native messaging host for browser extensions."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[dependencies]
+udm-core.workspace = true
+udm-store.workspace = true
+udm-control.workspace = true
+tokio.workspace = true
+serde_json.workspace = true
+
+[dev-dependencies]
+tempfile.workspace = true
+tokio = { workspace = true, features = ["test-util"] }
