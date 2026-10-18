@@ -413,7 +413,13 @@ fn copy_dir(from: &Path, to: &Path) {
         if e.file_type().unwrap().is_dir() {
             copy_dir(&e.path(), &target);
         } else {
-            std::fs::copy(e.path(), target).unwrap();
+            // The live engine renames `*.tmp` files away during atomic saves.
+            match std::fs::copy(e.path(), target) {
+                Err(err) if err.kind() == std::io::ErrorKind::NotFound => {}
+                r => {
+                    r.unwrap();
+                }
+            }
         }
     }
 }
