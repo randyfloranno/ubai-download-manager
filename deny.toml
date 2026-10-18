@@ -5,6 +5,23 @@
 
 [graph]
 all-features = true
+# Platforms UDM ships for. Dependencies that only a non-shipped platform would compile
+# (e.g. Linux-only deps of a Windows-only crate) are not part of any build.
+targets = [
+    "x86_64-pc-windows-msvc",
+    "aarch64-pc-windows-msvc",
+    "x86_64-apple-darwin",
+    "aarch64-apple-darwin",
+    "x86_64-unknown-linux-gnu",
+    "aarch64-unknown-linux-gnu",
+    "wasm32-unknown-unknown",
+]
+# cargo-deny checks each dependency edge against the union of `targets`, so it pulls in
+# `dirs` (Linux-only dep of `tray-icon`) although `tray-icon` is a Windows-only dep of udm-app
+# and no shipped build compiles `dirs` (MPL-2.0 `option-ext`). `cargo xtask deny` also runs
+# the built-in checker, which resolves per target and does NOT honour this exclusion: if
+# `dirs` ever reaches a shipped build, the gate fails.
+exclude = ["dirs"]
 
 [licenses]
 # Permissive licences only. GPL, LGPL, AGPL, SSPL, MPL and "non-commercial" licences are forbidden.

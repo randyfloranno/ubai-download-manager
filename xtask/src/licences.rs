@@ -4,7 +4,7 @@
 use std::fmt::Write as _;
 use std::path::Path;
 
-use crate::{metadata, util};
+use crate::{deny, metadata, util};
 
 fn is_licence_file(name: &str) -> bool {
     let up = name.to_ascii_uppercase();
@@ -14,7 +14,9 @@ fn is_licence_file(name: &str) -> bool {
 }
 
 pub fn run() -> Result<(), String> {
-    let meta = metadata::load(false)?;
+    // Same platform set as the licence gate: only crates that some shipped build compiles.
+    let targets = deny::load_config()?.graph.targets;
+    let meta = metadata::load_for_targets(&targets)?;
     let mut pkgs: Vec<&metadata::Package> = meta
         .packages
         .iter()

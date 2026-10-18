@@ -12,11 +12,20 @@ use crate::{metadata, util};
 #[derive(Debug, Deserialize, Default)]
 pub struct DenyToml {
     #[serde(default)]
+    pub graph: Graph,
+    #[serde(default)]
     pub licenses: Licenses,
     #[serde(default)]
     pub bans: Bans,
     #[serde(default)]
     pub sources: Sources,
+}
+
+/// `[graph]`: the platforms UDM ships for.
+#[derive(Debug, Deserialize, Default)]
+pub struct Graph {
+    #[serde(default)]
+    pub targets: Vec<String>,
 }
 
 #[derive(Debug, Deserialize, Default)]
@@ -303,13 +312,14 @@ pub fn run() -> Result<(), String> {
         ]);
         util::run_status(cmd)?;
         println!("deny: OK (cargo-deny)");
-        return Ok(());
+        // The built-in checker resolves per target and ignores `[graph] exclude`; it always runs.
+    } else {
+        println!(
+            "deny: cargo-deny not available (or UDM_XTASK_BUILTIN_DENY=1), using the built-in checker"
+        );
     }
-    println!(
-        "deny: cargo-deny not available (or UDM_XTASK_BUILTIN_DENY=1), using the built-in checker"
-    );
     let cfg = load_config()?;
-    let meta = metadata::load(false)?;
+    let meta = metadata::load_for_targets(&cfg.graph.targets)?;
     let pkgs: Vec<PkgInfo<'_>> = meta
         .packages
         .iter()

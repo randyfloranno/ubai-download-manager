@@ -47,6 +47,39 @@ pub fn load(no_deps: bool) -> Result<Metadata, String> {
     serde_json::from_str(&out).map_err(|e| format!("cannot parse cargo metadata output: {e}"))
 }
 
+/// `cargo metadata` resolved for each of `targets` (`--filter-platform`), packages merged.
+/// A dependency that only a platform outside `targets` would compile is left out.
+/// An empty list resolves for all platforms.
+pub fn load_for_targets(targets: &[String]) -> Result<Metadata, String> {
+    let Some((first, rest)) = targets.split_first() else {
+        return load(false);
+    };
+    let mut merged = load_filtered(first)?;
+    for t in rest {
+        let m = load_filtered(t)?;
+        for p in m.packages {
+            if !merged.packages.iter().any(|q| q.id == p.id) {
+                merged.packages.push(p);
+            }
+        }
+    }
+    Ok(merged)
+}
+
+fn load_filtered(target: &str) -> Result<Metadata, String> {
+    let mut cmd = util::cargo();
+    cmd.args([
+        "metadata",
+        "--format-version",
+        "1",
+        "--all-features",
+        "--filter-platform",
+        target,
+    ]);
+    let out = util::run_capture(cmd)?;
+    serde_json::from_str(&out).map_err(|e| format!("cannot parse cargo metadata output: {e}"))
+}
+
 impl Metadata {
     /// Packages that are workspace members.
     pub fn workspace_packages(&self) -> Vec<&Package> {
