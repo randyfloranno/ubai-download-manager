@@ -29,5 +29,8 @@
 | Baris perintah dan skrip | done | `local_backend_runs_script_lines`, `cli_parses` |
 | Ikon baki sistem (tampilkan, jeda semua, lanjutkan semua, keluar; tutup ke baki) | partial (hanya Windows) | `tray_labels_exist_in_both_locales`; pemeriksaan manual di Windows |
 | Buka berkas / buka lokasi berkas dari menu konteks unduhan | done | `open_file_and_folder_go_through_the_platform`; pemeriksaan manual di Windows |
+| Dialog unduhan selesai (buka, buka folder, jangan tampilkan lagi) | done | `defaults_are_valid_and_classify` (`complete_dialog`); tangkapan layar `completed-{id,en}.png` |
+| Pintasan papan ketik (Enter, Delete, Ctrl+V) | done | `hostile_pasted_link_is_bounded_and_checked` |
+| Folder bawaan mengikuti folder Downloads sistem operasi | done | `reg_query_output_is_parsed_and_expanded`, `hostile_user_dirs_values_are_refused` |
 | Installer dan penandatanganan kode | todo | keputusan pemilik; `cargo xtask dist` membuat folder |
 | DRM / perekaman stream | won't do | — |

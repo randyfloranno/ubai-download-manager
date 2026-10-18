@@ -1,7 +1,7 @@
 //! Seams to the operating system, so tests can inject faults (disk full,
 //! write errors, no free space) and never shut the test machine down.
 
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
 use udm_sys::{FileWriter, PartFile, PowerAction, SysError};
@@ -30,6 +30,11 @@ pub trait Platform: Send + Sync + 'static {
 
     /// Opens a file with its default program or (`reveal`) shows it in the file manager.
     fn open_path(&self, path: &Path, reveal: bool) -> Result<(), SysError>;
+
+    /// The Downloads folder the desktop is configured with, if known.
+    fn downloads_dir(&self) -> Option<PathBuf> {
+        None
+    }
 }
 
 /// The real platform, backed by `udm-sys`.
@@ -65,5 +70,9 @@ impl Platform for SystemPlatform {
 
     fn open_path(&self, path: &Path, reveal: bool) -> Result<(), SysError> {
         udm_sys::open_path(path, reveal)
+    }
+
+    fn downloads_dir(&self) -> Option<PathBuf> {
+        udm_sys::downloads_dir()
     }
 }

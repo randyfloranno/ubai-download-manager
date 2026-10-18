@@ -7,6 +7,13 @@ UDM (Ubai Download Manager) adalah pengelola unduhan desktop yang membagi berkas
 - [Klien baris perintah](cli.md)
 - [Integrasi peramban](browser-integration.md)
 
+## Memakai jendela utama
+
+- **Klik kanan sebuah unduhan:** *Buka* (unduhan yang sudah selesai), *Buka lokasi berkas* (menampilkan berkas terpilih di pengelola berkas), lanjutkan/jeda, ulangi, verifikasi, hapus, properti.
+- **Dialog unduhan selesai:** menampilkan lokasi penyimpanan berkas, dengan tombol *Buka*, *Buka folder* dan *Tutup*. Matikan lewat *Jangan tampilkan dialog ini lagi* atau di Pengaturan.
+- **Papan ketik:** <kbd>Enter</kbd> membuka unduhan terpilih yang sudah selesai (properti untuk yang belum selesai), <kbd>Delete</kbd> meminta konfirmasi hapus, <kbd>Ctrl</kbd>+<kbd>V</kbd> membuka *Tambah unduhan* berisi tautan yang disalin.
+- **Folder unduhan bawaan:** folder Downloads yang dipakai desktop Anda (known folder Windows, XDG user dirs di Linux), atau `<home>/Downloads` bila tidak ada.
+
 ## Membuat folder rilis
 
 ```powershell

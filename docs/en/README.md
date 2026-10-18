@@ -7,6 +7,13 @@ UDM (Ubai Download Manager) is a desktop download manager that splits large file
 - [Command-line client](cli.md)
 - [Browser integration](browser-integration.md)
 
+## Using the main window
+
+- **Right-click a download:** *Open* (finished downloads), *Open file location* (shows the file selected in the file manager), resume/pause, restart, verify, remove, properties.
+- **Download complete dialog:** shows where the file was saved, with *Open*, *Open folder* and *Close*. Turn it off with *Don't show this dialog again* or in Settings.
+- **Keyboard:** <kbd>Enter</kbd> opens the selected finished download (properties for unfinished ones), <kbd>Delete</kbd> asks to remove it, <kbd>Ctrl</kbd>+<kbd>V</kbd> opens *Add download* with the copied link.
+- **Default download folder:** the Downloads folder your desktop uses (Windows known folder, XDG user dirs on Linux), else `<home>/Downloads`.
+
 ## Building a release folder
 
 ```powershell

@@ -8,4 +8,4 @@
 - Installer, code signing and notarisation: `cargo xtask dist` builds a portable folder; Windows may warn about an unknown publisher.
 - Store extension ids for Chrome and Edge: assigned on publication; until then register the unpacked extension with `udm-cli native-host install --extension-id <id>`.
 - Auto-update: none; install a newer build over the old one.
-- Default download folder is `<home>/Downloads` (`%USERPROFILE%\Downloads` on Windows); a Downloads folder moved elsewhere by the OS (known-folder redirection, XDG user dirs) is not detected yet. Change it in Settings.
+- Default download folder is the desktop's Downloads folder (Windows known folder, XDG `user-dirs.dirs` on Linux), else `<home>/Downloads`. On Windows a redirected Downloads path with non-ASCII characters is not detected yet and falls back to `%USERPROFILE%\Downloads`. Change it in Settings.

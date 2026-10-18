@@ -29,5 +29,8 @@
 | Command line and scripting | done | `local_backend_runs_script_lines`, `cli_parses` |
 | Tray icon (show, pause all, resume all, quit; close to tray) | partial (Windows only) | `tray_labels_exist_in_both_locales`; manual check on Windows |
 | Open file / open file location from the download context menu | done | `open_file_and_folder_go_through_the_platform`; manual check on Windows |
+| Download complete dialog (open, open folder, don't show again) | done | `defaults_are_valid_and_classify` (`complete_dialog`); screenshots `completed-{id,en}.png` |
+| Keyboard shortcuts (Enter, Delete, Ctrl+V) | done | `hostile_pasted_link_is_bounded_and_checked` |
+| Default folder follows the OS Downloads folder | done | `reg_query_output_is_parsed_and_expanded`, `hostile_user_dirs_values_are_refused` |
 | Installer and code signing | todo | owner decision; `cargo xtask dist` builds a folder |
 | DRM / stream ripping | won't do | — |

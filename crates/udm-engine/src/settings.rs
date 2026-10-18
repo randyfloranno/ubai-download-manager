@@ -117,6 +117,8 @@ pub struct Settings {
     pub notify_on_complete: bool,
     /// Closing the main window hides it to the system tray (where available).
     pub close_to_tray: bool,
+    /// Show the "download complete" dialog with Open / Open folder.
+    pub complete_dialog: bool,
     /// Browser capture: only take over files with these extensions (empty = all).
     pub capture_extensions: Vec<String>,
     /// Browser capture: minimum size to take over (0 = any).
@@ -144,6 +146,7 @@ impl Default for Settings {
             clipboard_capture: false,
             notify_on_complete: true,
             close_to_tray: true,
+            complete_dialog: true,
             capture_extensions: Vec::new(),
             capture_min_size: 0,
             proxy: ProxySettings::default(),
@@ -222,7 +225,16 @@ impl Settings {
 
     /// Makes the download and category folders absolute: relative ones are
     /// taken from `home`, so files never land next to the program.
-    pub fn resolve_relative_dirs(&mut self, home: &std::path::Path) {
+    pub fn resolve_relative_dirs(
+        &mut self,
+        home: &std::path::Path,
+        downloads: Option<&std::path::Path>,
+    ) {
+        // The untouched default follows the desktop's Downloads folder.
+        if let Some(d) = downloads.filter(|_| self.download_dir == Settings::default().download_dir)
+        {
+            self.download_dir = d.to_path_buf();
+        }
         if self.download_dir.is_relative() {
             self.download_dir = home.join(&self.download_dir);
         }
@@ -289,6 +301,7 @@ mod tests {
         // Settings files written before `close_to_tray` existed keep the default.
         let old: Settings = serde_json::from_str(r#"{"locale":"en"}"#).unwrap();
         assert!(old.close_to_tray);
+        assert!(old.complete_dialog);
     }
 
     #[test]
@@ -296,14 +309,21 @@ mod tests {
         let home = std::env::temp_dir().join("home");
         let mut s = Settings::default();
         s.categories[0].folder = Some(PathBuf::from("Docs"));
-        s.resolve_relative_dirs(&home);
+        s.resolve_relative_dirs(&home, None);
         assert_eq!(s.download_dir, home.join("Downloads"));
         assert_eq!(s.folder_for("video"), home.join("Downloads").join("Video"));
         assert_eq!(s.categories[0].folder, Some(home.join("Docs")));
         // Absolute folders are left alone.
         let abs = std::env::temp_dir().join("elsewhere");
         s.download_dir = abs.clone();
-        s.resolve_relative_dirs(&home);
+        s.resolve_relative_dirs(&home, None);
+        assert_eq!(s.download_dir, abs);
+        // The default follows the desktop's Downloads folder; a chosen one does not.
+        let desktop = std::env::temp_dir().join("Unduhan");
+        let mut d = Settings::default();
+        d.resolve_relative_dirs(&home, Some(&desktop));
+        assert_eq!(d.download_dir, desktop);
+        s.resolve_relative_dirs(&home, Some(&desktop));
         assert_eq!(s.download_dir, abs);
     }
 

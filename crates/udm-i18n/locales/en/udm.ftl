@@ -335,6 +335,7 @@ ui-settings-max-concurrent = Downloads at once
 ui-settings-global-limit = Global speed limit
 ui-settings-subfolders = Put each category in its own folder
 ui-settings-notify = Notify when a download completes
+ui-settings-complete-dialog = Show a dialog when a download completes
 ui-settings-close-to-tray = Closing the window keeps UDM running in the tray
 ui-tray-show = Show UDM
 ui-tray-quit = Quit
@@ -360,6 +361,10 @@ ui-remove-delete-file = Also delete the file from disk
 ui-properties-title = Properties
 ui-captured-title = Links captured
 ui-captured-question = { $count } download links were found on the clipboard. Add them?
+ui-completed-title = Download complete
+ui-completed-saved-in = Saved in
+ui-completed-open-folder = Open folder
+ui-completed-dont-show = Don't show this dialog again
 
 ## Native messaging host
 

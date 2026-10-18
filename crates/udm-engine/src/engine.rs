@@ -191,7 +191,8 @@ impl Engine {
 
         let home = udm_store::user_home();
         if let Some(home) = &home {
-            settings.resolve_relative_dirs(home);
+            let downloads = cfg.platform.downloads_dir();
+            settings.resolve_relative_dirs(home, downloads.as_deref());
         }
 
         let queue_path = cfg.data_dir.queue_file();

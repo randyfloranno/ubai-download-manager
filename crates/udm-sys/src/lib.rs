@@ -1,4 +1,4 @@
-//! UDM OS services: disk space, pre-allocation, file writer, power, clipboard, notifications.
+//! UDM OS services: Downloads folder, disk space, pre-allocation, file writer, power, clipboard, notifications.
 #![forbid(unsafe_code)]
 #![deny(
     clippy::unwrap_used,
@@ -29,6 +29,7 @@
 
 mod desktop;
 mod error;
+mod folders;
 mod path;
 mod power;
 mod space;
@@ -40,6 +41,7 @@ pub mod testing;
 
 pub use desktop::{clipboard_text, notify, open_path};
 pub use error::SysError;
+pub use folders::downloads_dir;
 pub use path::{long_path, rename_no_overwrite};
 pub use power::{POWER_DRY_RUN_ENV, PowerAction, perform_power_action};
 pub use space::{available_space, ensure_space};

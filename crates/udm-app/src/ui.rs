@@ -78,6 +78,7 @@ struct SettingsForm {
     clipboard: bool,
     notify: bool,
     close_to_tray: bool,
+    complete_dialog: bool,
     subfolders: bool,
 }
 
@@ -121,6 +122,10 @@ enum Dialog {
     },
     Properties(PropForm),
     Captured(Vec<String>),
+    Completed {
+        id: String,
+        dont_show: bool,
+    },
 }
 
 /// What a dialog asks for after a frame.
@@ -400,7 +405,13 @@ impl UdmApp {
 
     fn engine_event(&mut self, ctx: &egui::Context, ev: EngineEvent) {
         match ev {
-            EngineEvent::Completed { file_name, .. } => {
+            EngineEvent::Completed { id, file_name, .. } => {
+                if self.dialog.is_none() && self.engine.settings().complete_dialog {
+                    self.dialog = Some(Dialog::Completed {
+                        id: id.to_string(),
+                        dont_show: false,
+                    });
+                }
                 let text = self.loc.tr_args(
                     "ui-notice-completed",
                     &[("name", TrArg::Str(file_name.as_str().into()))],
@@ -492,6 +503,7 @@ impl UdmApp {
                 clipboard: s.clipboard_capture,
                 notify: s.notify_on_complete,
                 close_to_tray: s.close_to_tray,
+                complete_dialog: s.complete_dialog,
                 subfolders: s.category_subfolders,
             })),
             "schedule" => {
@@ -550,6 +562,16 @@ impl UdmApp {
                     delete_file: false,
                 })
             }
+            "completed" => {
+                let Some(d) = selected.filter(is_finished) else {
+                    return false;
+                };
+                self.selected = Some(d.id.clone());
+                Some(Dialog::Completed {
+                    id: d.id,
+                    dont_show: false,
+                })
+            }
             "captured" => Some(Dialog::Captured(vec![
                 "http://127.0.0.1/example.zip".to_owned(),
             ])),
@@ -578,6 +600,7 @@ impl UdmApp {
             Dialog::Remove { .. } => ("ui-remove-title", "dlg-remove"),
             Dialog::Properties(_) => ("ui-properties-title", "dlg-properties"),
             Dialog::Captured(_) => ("ui-captured-title", "dlg-captured"),
+            Dialog::Completed { .. } => ("ui-completed-title", "dlg-completed"),
         };
         let mut open = true;
         let mut out = Outcome::default();
@@ -602,6 +625,9 @@ impl UdmApp {
                     } => remove_dialog(ui, loc, id, name, delete_file),
                     Dialog::Properties(f) => properties_dialog(ui, loc, f, &downloads),
                     Dialog::Captured(links) => captured_dialog(ui, loc, links),
+                    Dialog::Completed { id, dont_show } => {
+                        completed_dialog(ui, loc, id, dont_show, &downloads)
+                    }
                 };
             });
         if let Some(l) = out.locale {
@@ -1095,9 +1121,63 @@ impl UdmApp {
     }
 }
 
+impl UdmApp {
+    /// Main-list shortcuts while no dialog is open and no text field has
+    /// focus: Enter opens (or shows properties), Delete asks to remove,
+    /// Ctrl+V adds the pasted link.
+    fn shortcuts(&mut self, ctx: &egui::Context) {
+        if self.dialog.is_some() || ctx.memory(|m| m.focused().is_some()) {
+            return;
+        }
+        let (enter, delete, pasted) = ctx.input(|i| {
+            let pasted = i.events.iter().find_map(|e| match e {
+                egui::Event::Paste(t) => Some(pasted_link(t)),
+                _ => None,
+            });
+            (
+                i.key_pressed(egui::Key::Enter),
+                i.key_pressed(egui::Key::Delete),
+                pasted,
+            )
+        });
+        if let Some(url) = pasted {
+            self.open_dialog("add");
+            if let Some(Dialog::Add(f)) = &mut self.dialog {
+                f.url = url;
+            }
+            return;
+        }
+        let Some(d) = self.selected_view() else {
+            return;
+        };
+        if enter && is_finished(&d) {
+            self.run("download.open", json!({ "download_id": d.id }));
+        } else if enter {
+            self.open_dialog("properties");
+        } else if delete {
+            self.open_dialog("remove");
+        }
+    }
+}
+
+/// The first line of pasted text if it looks like a download link, else empty.
+fn pasted_link(text: &str) -> String {
+    let line = text.lines().map(str::trim).find(|l| !l.is_empty());
+    line.filter(|l| l.len() <= limits::MAX_URL_BYTES)
+        .filter(|l| {
+            let lower = l.to_ascii_lowercase();
+            ["http://", "https://", "ftp://", "ftps://"]
+                .iter()
+                .any(|p| lower.starts_with(p))
+        })
+        .map(str::to_owned)
+        .unwrap_or_default()
+}
+
 impl eframe::App for UdmApp {
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.poll(ctx);
+        self.shortcuts(ctx);
         self.tray_tick(ctx);
     }
 
@@ -1336,6 +1416,12 @@ fn settings_dialog(ui: &mut Ui, loc: &Localizer, f: &mut SettingsForm) -> Outcom
             ui.label("");
             ui.checkbox(&mut f.notify, loc.tr("ui-settings-notify"));
             ui.end_row();
+            ui.label("");
+            ui.checkbox(
+                &mut f.complete_dialog,
+                loc.tr("ui-settings-complete-dialog"),
+            );
+            ui.end_row();
             if cfg!(windows) {
                 ui.label("");
                 ui.checkbox(&mut f.close_to_tray, loc.tr("ui-settings-close-to-tray"));
@@ -1357,6 +1443,7 @@ fn settings_dialog(ui: &mut Ui, loc: &Localizer, f: &mut SettingsForm) -> Outcom
             set("category_subfolders", f.subfolders.to_string()),
             set("notify_on_complete", f.notify.to_string()),
             set("close_to_tray", f.close_to_tray.to_string()),
+            set("complete_dialog", f.complete_dialog.to_string()),
             (
                 "capture.clipboard_toggle",
                 json!({ "enabled": f.clipboard }),
@@ -1730,9 +1817,74 @@ fn captured_dialog(ui: &mut Ui, loc: &Localizer, links: &[String]) -> Outcome {
     out
 }
 
+fn completed_dialog(
+    ui: &mut Ui,
+    loc: &Localizer,
+    id: &str,
+    dont_show: &mut bool,
+    downloads: &[DownloadView],
+) -> Outcome {
+    let mut out = Outcome::default();
+    let Some(d) = downloads.iter().find(|d| d.id == id) else {
+        out.close = true;
+        return out;
+    };
+    let l = loc.locale();
+    ui.label(RichText::new(&d.file_name).strong());
+    egui::Grid::new("completed-grid")
+        .num_columns(2)
+        .spacing([12.0, 4.0])
+        .show(ui, |ui| {
+            ui.label(loc.tr("ui-completed-saved-in"));
+            ui.label(&d.dir);
+            ui.end_row();
+            ui.label(loc.tr("ui-col-size"));
+            ui.label(format_bytes(l, d.size.unwrap_or(d.downloaded)));
+            ui.end_row();
+        });
+    ui.add_space(6.0);
+    ui.checkbox(dont_show, loc.tr("ui-completed-dont-show"));
+    ui.add_space(6.0);
+    let args = json!({ "download_id": d.id });
+    ui.horizontal(|ui| {
+        if ui.button(loc.tr("cmd-download-open")).clicked() {
+            out.run.push(("download.open", args.clone()));
+            out.close = true;
+        }
+        if ui.button(loc.tr("ui-completed-open-folder")).clicked() {
+            out.run.push(("download.open_folder", args.clone()));
+            out.close = true;
+        }
+        if ui.button(loc.tr("ui-btn-close")).clicked() {
+            out.close = true;
+        }
+    });
+    if out.close && *dont_show {
+        out.run.push((
+            "settings.set",
+            json!({ "name": "complete_dialog", "value": "false" }),
+        ));
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn hostile_pasted_link_is_bounded_and_checked() {
+        assert_eq!(
+            pasted_link("\n  https://x.test/a.zip  \nsecond"),
+            "https://x.test/a.zip"
+        );
+        assert_eq!(pasted_link("FTP://h/f"), "FTP://h/f");
+        assert_eq!(pasted_link("javascript:alert(1)"), "");
+        assert_eq!(pasted_link("file:///C:/Windows"), "");
+        assert_eq!(pasted_link(""), "");
+        let long = format!("https://x.test/{}", "a".repeat(limits::MAX_URL_BYTES));
+        assert_eq!(pasted_link(&long), "");
+    }
 
     #[test]
     fn kib_conversion_is_safe() {

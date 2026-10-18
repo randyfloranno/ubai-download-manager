@@ -1110,7 +1110,7 @@ impl Engine {
                 }
                 s.download_dir = PathBuf::from(value);
                 if let Some(home) = udm_store::user_home() {
-                    s.resolve_relative_dirs(&home);
+                    s.resolve_relative_dirs(&home, None);
                 }
             }
             "category_subfolders" => s.category_subfolders = parse_bool(value)?,
@@ -1127,6 +1127,7 @@ impl Engine {
             }
             "notify_on_complete" => s.notify_on_complete = parse_bool(value)?,
             "close_to_tray" => s.close_to_tray = parse_bool(value)?,
+            "complete_dialog" => s.complete_dialog = parse_bool(value)?,
             "capture_extensions" => {
                 let list: Vec<String> = value
                     .split([',', ' '])

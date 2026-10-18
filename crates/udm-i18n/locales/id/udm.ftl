@@ -335,6 +335,7 @@ ui-settings-max-concurrent = Unduhan bersamaan
 ui-settings-global-limit = Batas kecepatan global
 ui-settings-subfolders = Simpan tiap kategori di foldernya sendiri
 ui-settings-notify = Beri tahu saat unduhan selesai
+ui-settings-complete-dialog = Tampilkan dialog saat unduhan selesai
 ui-settings-close-to-tray = Tetap jalankan UDM di baki sistem saat jendela ditutup
 ui-tray-show = Tampilkan UDM
 ui-tray-quit = Keluar
@@ -360,6 +361,10 @@ ui-remove-delete-file = Hapus juga berkasnya dari disk
 ui-properties-title = Properti
 ui-captured-title = Tautan tertangkap
 ui-captured-question = Ditemukan { $count } tautan unduhan di papan klip. Tambahkan?
+ui-completed-title = Unduhan selesai
+ui-completed-saved-in = Disimpan di
+ui-completed-open-folder = Buka folder
+ui-completed-dont-show = Jangan tampilkan dialog ini lagi
 
 ## Native messaging host
 

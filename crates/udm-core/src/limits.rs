@@ -76,6 +76,8 @@ pub const CHECKPOINT_INTERVAL_MS: u64 = 1_000;
 pub const CHECKPOINT_BYTES: u64 = 4_194_304;
 /// Autosave debounce for queue/history/settings (≤ 2 s).
 pub const AUTOSAVE_DEBOUNCE_MS: u64 = 1_000;
+/// Maximum bytes read from a desktop folder config (`user-dirs.dirs`, `reg query` output).
+pub const MAX_DESKTOP_CONFIG_BYTES: u64 = 65_536;
 /// Maximum size of a state/settings/queue file read from disk (16 MiB).
 pub const MAX_STATE_FILE_BYTES: u64 = 16_777_216;
 /// Maximum size of one history line.
