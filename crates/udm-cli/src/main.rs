@@ -288,6 +288,8 @@ fn add_args(
     let mut o = serde_json::Map::new();
     o.insert("url".into(), Value::from(url));
     if let Some(d) = dir {
+        // Relative to where the CLI runs, not to the app's working folder.
+        let d = std::path::absolute(d).unwrap_or_else(|_| d.to_path_buf());
         o.insert("dir".into(), Value::from(d.display().to_string()));
     }
     if let Some(c) = connections {

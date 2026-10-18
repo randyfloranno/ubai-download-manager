@@ -256,6 +256,31 @@ async fn golden_etag_change_between_attempts_restarts() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn relative_download_folders_load_under_home() {
+    // Older versions stored the default folder as plain `Downloads`.
+    let h = start();
+    exec(
+        &h.engine,
+        "download.add",
+        serde_json::json!({ "url": "http://127.0.0.1:9/files/tiny.txt", "dir": "Downloads", "start": false }),
+    )
+    .await
+    .unwrap();
+    h.engine.shutdown().await;
+    let (e2, _) = udm_engine::Engine::start(config(
+        &h.data(),
+        h.platform.clone(),
+        h.secrets.clone(),
+        Vec::new(),
+    ))
+    .unwrap();
+    let home = udm_store::user_home().unwrap();
+    let dirs: Vec<_> = e2.downloads().into_iter().map(|v| v.dir).collect();
+    assert_eq!(dirs, vec![home.join("Downloads").display().to_string()]);
+    e2.shutdown().await;
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn golden_app_restart_resumes() {
     let srv = TestServer::start().await.unwrap();
     let h = start();

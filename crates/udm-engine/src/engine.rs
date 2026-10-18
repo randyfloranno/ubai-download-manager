@@ -3,7 +3,7 @@
 //! supervises download tasks.
 
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::{Duration, Instant};
@@ -189,8 +189,9 @@ impl Engine {
                 }
             };
 
-        if let Some(home) = udm_store::user_home() {
-            settings.resolve_relative_dirs(&home);
+        let home = udm_store::user_home();
+        if let Some(home) = &home {
+            settings.resolve_relative_dirs(home);
         }
 
         let queue_path = cfg.data_dir.queue_file();
@@ -212,6 +213,14 @@ impl Engine {
                     (None, Vec::new(), 0)
                 }
             };
+        let mut history = history;
+        if let Some(home) = &home {
+            for h in &mut history {
+                if Path::new(&h.path).is_relative() {
+                    h.path = home.join(&h.path).display().to_string();
+                }
+            }
+        }
         if skipped > 0 {
             notices.push(
                 Message::new("notice-history-lines-skipped")
@@ -230,6 +239,10 @@ impl Engine {
                 continue;
             };
             max_id = max_id.max(id.value());
+            // Older versions stored the default folder relative (`Downloads`).
+            if let Some(home) = home.as_ref().filter(|_| rec.dir.is_relative()) {
+                rec.dir = home.join(&rec.dir);
+            }
             let mut status = rec.status.to_status();
             // Downloads interrupted by shutdown resume on the next start.
             if status == DownloadStatus::Paused(PauseReason::Shutdown) {

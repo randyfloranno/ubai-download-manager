@@ -34,6 +34,16 @@ fn queue_not_found(q: &str) -> EngineError {
     EngineError::Msg(Message::new("error-engine-queue-not-found").with_str("queue", q))
 }
 
+/// The `dir` argument; a relative folder is taken from the user's home, like
+/// the default download folder.
+fn dir_arg(a: &CommandArgs) -> Option<PathBuf> {
+    let dir = PathBuf::from(a.str("dir")?);
+    match udm_store::user_home() {
+        Some(home) if dir.is_relative() => Some(home.join(dir)),
+        _ => Some(dir),
+    }
+}
+
 fn required_id(args: &CommandArgs) -> EngineResult<DownloadId> {
     args.download_id("download_id")
         .ok_or_else(|| bad_arg("download_id"))
@@ -118,7 +128,7 @@ impl Engine {
             "download.add" => {
                 let spec = AddSpec {
                     url: required_str(a, "url")?.to_owned(),
-                    dir: a.str("dir").map(PathBuf::from),
+                    dir: dir_arg(a),
                     file_name: a.str("file_name").map(str::to_owned),
                     connections: a.uint("connections").map(connections_arg).transpose()?,
                     category: a.str("category").map(str::to_owned),
@@ -738,7 +748,7 @@ impl Engine {
         for u in urls {
             let spec = AddSpec {
                 url: u.clone(),
-                dir: a.str("dir").map(PathBuf::from),
+                dir: dir_arg(a),
                 queue: a.str("queue").map(str::to_owned),
                 start: a.bool("start").unwrap_or(false),
                 ..AddSpec::default()
