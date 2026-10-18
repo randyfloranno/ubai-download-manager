@@ -35,7 +35,7 @@ mod hash;
 mod history;
 
 pub use atomic::atomic_write;
-pub use datadir::DataDir;
+pub use datadir::{DataDir, user_home};
 pub use envelope::{load_envelope, save_envelope};
 pub use error::StoreError;
 pub use history::HistoryLog;

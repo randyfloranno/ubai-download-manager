@@ -115,6 +115,16 @@ fn env_dir(name: &str) -> Option<PathBuf> {
         .filter(|p| p.is_absolute())
 }
 
+/// The user's home folder (`%USERPROFILE%` on Windows), if absolute.
+/// Relative folders in the settings (the default `Downloads`) resolve against it.
+pub fn user_home() -> Option<PathBuf> {
+    if cfg!(windows) {
+        env_dir("USERPROFILE")
+    } else {
+        std::env::home_dir().filter(|h| h.is_absolute())
+    }
+}
+
 fn os_data_root() -> Option<PathBuf> {
     if cfg!(windows) {
         env_dir("APPDATA").map(|a| a.join("UDM").join("data"))
@@ -141,6 +151,11 @@ mod tests {
     fn os_default_is_absolute_or_fallback() {
         let d = DataDir::os_default();
         assert!(d.is_absolute() || d == Path::new(".udm"), "{}", d.display());
+    }
+
+    #[test]
+    fn user_home_is_absolute() {
+        assert!(user_home().is_none_or(|h| h.is_absolute()));
     }
 
     #[test]

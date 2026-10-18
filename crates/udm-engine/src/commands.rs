@@ -1069,6 +1069,9 @@ impl Engine {
                     return Err(bad_arg("value"));
                 }
                 s.download_dir = PathBuf::from(value);
+                if let Some(home) = udm_store::user_home() {
+                    s.resolve_relative_dirs(&home);
+                }
             }
             "category_subfolders" => s.category_subfolders = parse_bool(value)?,
             "connections" => {

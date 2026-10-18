@@ -171,7 +171,7 @@ impl Engine {
         let mut notices = Vec::new();
 
         let settings_path = cfg.data_dir.settings_file();
-        let settings =
+        let mut settings =
             match load_envelope::<Settings>(&settings_path, SETTINGS_KIND, SETTINGS_SCHEMA) {
                 Ok(Some((_, s))) => match s.validate() {
                     Ok(()) => s,
@@ -188,6 +188,10 @@ impl Engine {
                     Settings::default()
                 }
             };
+
+        if let Some(home) = udm_store::user_home() {
+            settings.resolve_relative_dirs(&home);
+        }
 
         let queue_path = cfg.data_dir.queue_file();
         let qf = match load_envelope::<QueueFile>(&queue_path, QUEUE_KIND, QUEUE_SCHEMA) {

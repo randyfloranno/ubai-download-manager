@@ -98,7 +98,8 @@ pub struct TlsExceptionSetting {
 pub struct Settings {
     /// UI locale (`id` / `en`).
     pub locale: String,
-    /// Default download folder.
+    /// Default download folder. A relative path (the default `Downloads`) is
+    /// resolved against the user's home folder, never the working directory.
     pub download_dir: PathBuf,
     /// Put files into per-category sub-folders of the default folder.
     pub category_subfolders: bool,
@@ -219,6 +220,19 @@ impl Settings {
         }
     }
 
+    /// Makes the download and category folders absolute: relative ones are
+    /// taken from `home`, so files never land next to the program.
+    pub fn resolve_relative_dirs(&mut self, home: &std::path::Path) {
+        if self.download_dir.is_relative() {
+            self.download_dir = home.join(&self.download_dir);
+        }
+        for c in &mut self.categories {
+            if let Some(f) = c.folder.as_mut().filter(|f| f.is_relative()) {
+                *f = home.join(&*f);
+            }
+        }
+    }
+
     /// Credentials configured for a host.
     pub fn site_auth_for(&self, host: &str) -> Option<&SiteAuth> {
         self.site_auth
@@ -275,6 +289,22 @@ mod tests {
         // Settings files written before `close_to_tray` existed keep the default.
         let old: Settings = serde_json::from_str(r#"{"locale":"en"}"#).unwrap();
         assert!(old.close_to_tray);
+    }
+
+    #[test]
+    fn relative_folders_resolve_against_home() {
+        let home = std::env::temp_dir().join("home");
+        let mut s = Settings::default();
+        s.categories[0].folder = Some(PathBuf::from("Docs"));
+        s.resolve_relative_dirs(&home);
+        assert_eq!(s.download_dir, home.join("Downloads"));
+        assert_eq!(s.folder_for("video"), home.join("Downloads").join("Video"));
+        assert_eq!(s.categories[0].folder, Some(home.join("Docs")));
+        // Absolute folders are left alone.
+        let abs = std::env::temp_dir().join("elsewhere");
+        s.download_dir = abs.clone();
+        s.resolve_relative_dirs(&home);
+        assert_eq!(s.download_dir, abs);
     }
 
     #[test]
