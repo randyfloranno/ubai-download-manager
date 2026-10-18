@@ -83,6 +83,18 @@ pub static COMMANDS: &[CommandSpec] = &[
         [req("download_id", ID), opt("checksum", STR),]
     ),
     cmd!(
+        "download.open",
+        "cmd-download-open",
+        false,
+        [req("download_id", ID)]
+    ),
+    cmd!(
+        "download.open_folder",
+        "cmd-download-open-folder",
+        false,
+        [req("download_id", ID)]
+    ),
+    cmd!(
         "download.set_connections",
         "cmd-download-set-connections",
         false,

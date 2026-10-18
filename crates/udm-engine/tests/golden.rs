@@ -21,6 +21,40 @@ async fn golden_plain_multi_segment() {
 }
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
+async fn open_file_and_folder_go_through_the_platform() {
+    let srv = TestServer::start().await.unwrap();
+    let h = start();
+    let v = golden(&h, &srv.url("/files/tiny.txt"), "tiny.txt", 1).await;
+    let file = Path::new(&v.dir).join(&v.file_name);
+    let id = serde_json::json!({ "download_id": v.id });
+    exec(&h.engine, "download.open", id.clone()).await.unwrap();
+    exec(&h.engine, "download.open_folder", id).await.unwrap();
+    assert_eq!(
+        *h.platform.opened.lock().unwrap(),
+        vec![(file.clone(), false), (file.clone(), true)]
+    );
+    // A file deleted outside UDM is reported, not opened.
+    std::fs::remove_file(&file).unwrap();
+    let err = exec(
+        &h.engine,
+        "download.open",
+        serde_json::json!({ "download_id": v.id }),
+    )
+    .await
+    .unwrap_err();
+    assert_eq!(err.key, "error-engine-file-missing");
+    // The folder is still shown.
+    exec(
+        &h.engine,
+        "download.open_folder",
+        serde_json::json!({ "download_id": v.id }),
+    )
+    .await
+    .unwrap();
+    assert_eq!(h.platform.opened.lock().unwrap().len(), 3);
+}
+
+#[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn golden_tiny_and_single_connection() {
     let srv = TestServer::start().await.unwrap();
     let h = start();

@@ -20,6 +20,7 @@ pub struct TestPlatform {
     pub fail_after: Option<(u64, Fault)>,
     pub power_calls: AtomicU64,
     pub clipboard: std::sync::Mutex<Option<String>>,
+    pub opened: std::sync::Mutex<Vec<(PathBuf, bool)>>,
 }
 
 impl Platform for TestPlatform {
@@ -47,6 +48,13 @@ impl Platform for TestPlatform {
     }
     fn clipboard_text(&self) -> Result<Option<String>, SysError> {
         Ok(self.clipboard.lock().unwrap().clone())
+    }
+    fn open_path(&self, path: &Path, reveal: bool) -> Result<(), SysError> {
+        self.opened
+            .lock()
+            .unwrap()
+            .push((path.to_path_buf(), reveal));
+        Ok(())
     }
 }
 

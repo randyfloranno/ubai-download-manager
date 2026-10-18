@@ -38,7 +38,7 @@ mod writer;
 #[cfg(any(test, feature = "test-util"))]
 pub mod testing;
 
-pub use desktop::{clipboard_text, notify};
+pub use desktop::{clipboard_text, notify, open_path};
 pub use error::SysError;
 pub use path::{long_path, rename_no_overwrite};
 pub use power::{POWER_DRY_RUN_ENV, PowerAction, perform_power_action};

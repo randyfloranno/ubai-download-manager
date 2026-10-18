@@ -28,5 +28,6 @@
 | Tombol unduh di atas media yang diputar (hanya berkas langsung) | done | `direct_media_files_are_offered`, `hostile_ext_media_streams_and_streaming_sites_are_refused` |
 | Baris perintah dan skrip | done | `local_backend_runs_script_lines`, `cli_parses` |
 | Ikon baki sistem (tampilkan, jeda semua, lanjutkan semua, keluar; tutup ke baki) | partial (hanya Windows) | `tray_labels_exist_in_both_locales`; pemeriksaan manual di Windows |
+| Buka berkas / buka lokasi berkas dari menu konteks unduhan | done | `open_file_and_folder_go_through_the_platform`; pemeriksaan manual di Windows |
 | Installer dan penandatanganan kode | todo | keputusan pemilik; `cargo xtask dist` membuat folder |
 | DRM / perekaman stream | won't do | — |

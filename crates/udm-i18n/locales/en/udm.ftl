@@ -69,6 +69,7 @@ error-engine-cannot-pause = This download cannot be paused now.
 error-engine-already-completed = This download has already completed.
 error-engine-download-active = Stop the download first.
 error-engine-not-completed = This download has not completed yet.
+error-engine-file-missing = The file { $name } no longer exists.
 error-engine-internal = Internal error. The download state was kept.
 error-engine-no-free-name = No free file name for { $name }.
 error-engine-create-dir = Cannot create folder { $path }.
@@ -148,6 +149,7 @@ error-sys-unsupported = Not supported on this system.
 error-sys-clipboard = The clipboard cannot be read.
 error-sys-notify = The notification cannot be shown.
 error-sys-power = The power action failed.
+error-sys-open = Could not open { $path }.
 error-sys-not-enough-space = Not enough free space on { $volume }: { $needed } needed, { $available } available (short by { $shortfall }).
 
 ## Secret storage errors
@@ -169,6 +171,10 @@ cmd-download-restart = Restart
 cmd-download-restart-desc = Download the file again from the beginning.
 cmd-download-verify = Verify checksum
 cmd-download-verify-desc = Compute the checksum of the finished file.
+cmd-download-open = Open
+cmd-download-open-desc = Open the finished file with its default program.
+cmd-download-open-folder = Open file location
+cmd-download-open-folder-desc = Show the file in its folder.
 cmd-download-set-connections = Set connections
 cmd-download-set-connections-desc = Change the number of connections of a download.
 cmd-download-pause-all = Pause all

@@ -69,6 +69,7 @@ error-engine-cannot-pause = Unduhan ini tidak dapat dijeda sekarang.
 error-engine-already-completed = Unduhan ini sudah selesai.
 error-engine-download-active = Hentikan unduhan terlebih dahulu.
 error-engine-not-completed = Unduhan ini belum selesai.
+error-engine-file-missing = Berkas { $name } sudah tidak ada.
 error-engine-internal = Galat internal. Status unduhan tetap disimpan.
 error-engine-no-free-name = Tidak ada nama berkas yang tersedia untuk { $name }.
 error-engine-create-dir = Folder { $path } tidak dapat dibuat.
@@ -148,6 +149,7 @@ error-sys-unsupported = Tidak didukung pada sistem ini.
 error-sys-clipboard = Papan klip tidak dapat dibaca.
 error-sys-notify = Pemberitahuan tidak dapat ditampilkan.
 error-sys-power = Tindakan daya gagal.
+error-sys-open = Tidak dapat membuka { $path }.
 error-sys-not-enough-space = Ruang kosong di { $volume } tidak cukup: perlu { $needed }, tersedia { $available } (kurang { $shortfall }).
 
 ## Galat penyimpanan rahasia
@@ -169,6 +171,10 @@ cmd-download-restart = Mulai ulang
 cmd-download-restart-desc = Unduh ulang berkas dari awal.
 cmd-download-verify = Periksa checksum
 cmd-download-verify-desc = Hitung checksum berkas yang sudah selesai.
+cmd-download-open = Buka
+cmd-download-open-desc = Buka berkas yang sudah selesai dengan program bawaannya.
+cmd-download-open-folder = Buka lokasi berkas
+cmd-download-open-folder-desc = Tampilkan berkas di foldernya.
 cmd-download-set-connections = Atur koneksi
 cmd-download-set-connections-desc = Ubah jumlah koneksi sebuah unduhan.
 cmd-download-pause-all = Jeda semua

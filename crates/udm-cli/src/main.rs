@@ -171,7 +171,8 @@ fn default_data_dir() -> PathBuf {
 }
 
 fn data_dir(cli: &Cli) -> PathBuf {
-    cli.data_dir.clone().unwrap_or_else(default_data_dir)
+    let root = cli.data_dir.clone().unwrap_or_else(default_data_dir);
+    std::path::absolute(&root).unwrap_or(root)
 }
 
 /// True when a UDM app is running on this data dir (its capture endpoint answers).

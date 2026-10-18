@@ -27,6 +27,9 @@ pub trait Platform: Send + Sync + 'static {
 
     /// Current clipboard text.
     fn clipboard_text(&self) -> Result<Option<String>, SysError>;
+
+    /// Opens a file with its default program or (`reveal`) shows it in the file manager.
+    fn open_path(&self, path: &Path, reveal: bool) -> Result<(), SysError>;
 }
 
 /// The real platform, backed by `udm-sys`.
@@ -58,5 +61,9 @@ impl Platform for SystemPlatform {
 
     fn clipboard_text(&self) -> Result<Option<String>, SysError> {
         udm_sys::clipboard_text()
+    }
+
+    fn open_path(&self, path: &Path, reveal: bool) -> Result<(), SysError> {
+        udm_sys::open_path(path, reveal)
     }
 }

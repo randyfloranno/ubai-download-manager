@@ -140,6 +140,8 @@ impl Engine {
                 .map(|()| ok()),
             "download.restart" => self.restart(required_id(a)?).map(|()| ok()),
             "download.verify" => self.verify(required_id(a)?, a.str("checksum")).await,
+            "download.open" => self.open(required_id(a)?, false).map(|()| ok()),
+            "download.open_folder" => self.open(required_id(a)?, true).map(|()| ok()),
             "download.set_connections" => {
                 let id = required_id(a)?;
                 let c = connections_arg(required_uint(a, "connections")?)?;
@@ -914,6 +916,34 @@ impl Engine {
             let _ = std::fs::remove_file(udm_sys::long_path(&p));
         }
         Ok(())
+    }
+
+    /// Opens the finished file, or (`folder`) shows the file, the part file
+    /// or the target folder in the file manager.
+    fn open(&self, id: DownloadId, folder: bool) -> EngineResult<()> {
+        let (target, reveal) = {
+            let st = self.state();
+            let e = st
+                .entries
+                .iter()
+                .find(|e| e.rec.download_id() == Some(id))
+                .ok_or_else(|| not_found(id))?;
+            let done = e.status == DownloadStatus::Completed;
+            let paths = Self::part_and_final(e);
+            match (folder, paths) {
+                (false, Some((_, fin))) if done => (fin, false),
+                (false, _) => return Err(err("error-engine-not-completed")),
+                (true, Some((_, fin))) if done && fin.is_file() => (fin, true),
+                (true, Some((part, _))) if part.is_file() => (part, true),
+                (true, _) => (e.rec.dir.clone(), false),
+            }
+        };
+        if !target.exists() {
+            return Err(Message::new("error-engine-file-missing")
+                .with_str("name", target.display().to_string())
+                .into());
+        }
+        Ok(self.inner.cfg.platform.open_path(&target, reveal)?)
     }
 
     async fn verify(&self, id: DownloadId, checksum: Option<&str>) -> EngineResult<Value> {

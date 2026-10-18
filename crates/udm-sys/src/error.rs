@@ -77,6 +77,13 @@ pub enum SysError {
         /// Error text or exit status.
         detail: String,
     },
+    /// The file manager or default program could not be started.
+    Open {
+        /// File or folder.
+        path: String,
+        /// OS error text.
+        detail: String,
+    },
 }
 
 impl SysError {
@@ -156,6 +163,9 @@ impl SysError {
             }
             SysError::Power { action, detail } => Message::new("error-sys-power")
                 .with_str("action", *action)
+                .with_str("detail", detail.clone()),
+            SysError::Open { path, detail } => Message::new("error-sys-open")
+                .with_str("path", path.clone())
                 .with_str("detail", detail.clone()),
         }
     }

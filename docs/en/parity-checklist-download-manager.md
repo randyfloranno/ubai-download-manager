@@ -28,5 +28,6 @@
 | Download button over playing media (direct files only) | done | `direct_media_files_are_offered`, `hostile_ext_media_streams_and_streaming_sites_are_refused` |
 | Command line and scripting | done | `local_backend_runs_script_lines`, `cli_parses` |
 | Tray icon (show, pause all, resume all, quit; close to tray) | partial (Windows only) | `tray_labels_exist_in_both_locales`; manual check on Windows |
+| Open file / open file location from the download context menu | done | `open_file_and_folder_go_through_the_platform`; manual check on Windows |
 | Installer and code signing | todo | owner decision; `cargo xtask dist` builds a folder |
 | DRM / stream ripping | won't do | — |

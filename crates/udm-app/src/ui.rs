@@ -840,6 +840,20 @@ impl UdmApp {
                             }
                             resp.context_menu(|ui| {
                                 self.selected = Some(d.id.clone());
+                                let done = d.status == "completed";
+                                for (cmd, key, enabled) in [
+                                    ("download.open", "cmd-download-open", done),
+                                    ("download.open_folder", "cmd-download-open-folder", true),
+                                ] {
+                                    if ui
+                                        .add_enabled(enabled, egui::Button::new(self.loc.tr(key)))
+                                        .clicked()
+                                    {
+                                        run.push((cmd, json!({ "download_id": d.id })));
+                                        ui.close();
+                                    }
+                                }
+                                ui.separator();
                                 for (cmd, key) in [
                                     ("download.resume", "cmd-download-resume"),
                                     ("download.pause", "cmd-download-pause"),

@@ -105,7 +105,9 @@ fn main() -> ExitCode {
         Ok(rt) => rt,
         Err(_) => return fail(&boot_loc, &Message::new("error-app-runtime")),
     };
-    let data_dir = DataDir::new(args.data_dir.clone().unwrap_or_else(default_data_dir));
+    // Absolute, so paths derived from it never depend on a later working directory.
+    let root = args.data_dir.clone().unwrap_or_else(default_data_dir);
+    let data_dir = DataDir::new(std::path::absolute(&root).unwrap_or(root));
     let secrets: Arc<dyn SecretStore> = Arc::new(KeyringStore::new());
     let cfg = EngineConfig {
         data_dir: data_dir.clone(),
