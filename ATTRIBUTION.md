@@ -50,4 +50,5 @@ Aturan kategori, tabel ekstensi berkas dan MIME, nama folder bawaan, pola URL pe
 |---|---|---|---|---|---|
 | `crates/udm-proto/src/category.rs` | Category → extension table | UDM contributors | Common file extensions (IANA media types, general knowledge) | MIT OR Apache-2.0 (project) | Written from scratch; not taken from any download manager. |
 | `crates/udm-ext/src/capture.rs` (`DEFAULT_EXTENSIONS`) | Extensions intercepted by the browser extension | UDM contributors | Same as above | MIT OR Apache-2.0 (project) | Written from scratch. |
+| `crates/udm-core/src/logo.rs` | UDM logo (app window, tray, `udm.exe` icon, extension icons) | UDM contributors | Own design, drawn in code | MIT OR Apache-2.0 (project) | Blue rounded square with a white three-bar download arrow. Created from scratch; not derived from any other download manager's logo. Generated PNG/ICO data is not checked in. |
 | `crates/udm-testsrv/src/fixture.rs` | Test-fixture generator (splitmix64 by offset) | UDM contributors | Own code | MIT OR Apache-2.0 (project) | All `/files/*` fixtures are generated; no third-party media. |

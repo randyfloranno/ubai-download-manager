@@ -32,6 +32,7 @@ pub mod command;
 pub mod coverage;
 pub mod id;
 pub mod limits;
+pub mod logo;
 pub mod message;
 pub mod secret;
 pub mod status;

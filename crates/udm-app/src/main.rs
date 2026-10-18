@@ -36,6 +36,7 @@ mod bridge;
 #[cfg(feature = "dev-sample")]
 mod sample;
 mod shot;
+mod tray;
 mod ui;
 
 use std::path::PathBuf;
@@ -64,6 +65,9 @@ struct Args {
     #[arg(long, value_name = "DIR")]
     data_dir: Option<PathBuf>,
 }
+
+/// Window icon edge in pixels.
+const WINDOW_ICON_PX: u16 = 64;
 
 fn default_data_dir() -> PathBuf {
     udm_store::DataDir::os_default()
@@ -169,12 +173,20 @@ fn main() -> ExitCode {
         bridge.clone(),
         startup_notices,
     );
-    let title = Localizer::new(app.locale()).tr("app-title");
+    let loc = Localizer::new(app.locale());
+    let mut viewport = eframe::egui::ViewportBuilder::default()
+        .with_title(loc.tr("app-title"))
+        .with_inner_size([1100.0, 680.0])
+        .with_min_inner_size([640.0, 400.0]);
+    if let Some(rgba) = udm_core::logo::rgba(WINDOW_ICON_PX) {
+        viewport = viewport.with_icon(Arc::new(eframe::egui::IconData {
+            rgba,
+            width: u32::from(WINDOW_ICON_PX),
+            height: u32::from(WINDOW_ICON_PX),
+        }));
+    }
     let options = eframe::NativeOptions {
-        viewport: eframe::egui::ViewportBuilder::default()
-            .with_title(title)
-            .with_inner_size([1100.0, 680.0])
-            .with_min_inner_size([640.0, 400.0]),
+        viewport,
         ..Default::default()
     };
     let result = eframe::run_native(
@@ -182,6 +194,9 @@ fn main() -> ExitCode {
         options,
         Box::new(move |cc| {
             bridge.set_context(cc.egui_ctx.clone());
+            let mut app = app;
+            // The tray must be created on the UI (event loop) thread.
+            app.attach_tray(tray::create(&loc, bridge.clone()));
             Ok(Box::new(app))
         }),
     );

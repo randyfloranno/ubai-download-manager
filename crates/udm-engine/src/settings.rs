@@ -114,6 +114,8 @@ pub struct Settings {
     pub clipboard_capture: bool,
     /// Show a notification when a download completes.
     pub notify_on_complete: bool,
+    /// Closing the main window hides it to the system tray (where available).
+    pub close_to_tray: bool,
     /// Browser capture: only take over files with these extensions (empty = all).
     pub capture_extensions: Vec<String>,
     /// Browser capture: minimum size to take over (0 = any).
@@ -140,6 +142,7 @@ impl Default for Settings {
             categories: default_categories(),
             clipboard_capture: false,
             notify_on_complete: true,
+            close_to_tray: true,
             capture_extensions: Vec::new(),
             capture_min_size: 0,
             proxy: ProxySettings::default(),
@@ -269,6 +272,9 @@ mod tests {
             PathBuf::from("Downloads").join("Video")
         );
         assert_eq!(s.folder_for(GENERAL_CATEGORY), PathBuf::from("Downloads"));
+        // Settings files written before `close_to_tray` existed keep the default.
+        let old: Settings = serde_json::from_str(r#"{"locale":"en"}"#).unwrap();
+        assert!(old.close_to_tray);
     }
 
     #[test]

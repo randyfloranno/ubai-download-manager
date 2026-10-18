@@ -16,6 +16,7 @@ UDM is a desktop download manager written in Rust. It speeds up large downloads 
 - Browser integration for Chrome, Edge and Firefox (extension + native messaging), clipboard capture
 - Batch download from a URL list, simple site grabber
 - Proxy (HTTP CONNECT, SOCKS5) and Basic/Digest authentication; passwords are kept only in the OS keychain
+- System tray icon on Windows (closing the window keeps downloads running)
 - Indonesian and English user interface; no telemetry
 
 UDM only downloads content that is directly accessible to you. It does not handle DRM, encrypted streams, paywalls or captchas.
@@ -54,6 +55,7 @@ UDM adalah pengelola unduhan desktop yang ditulis dengan Rust. UDM mempercepat u
 - Integrasi peramban untuk Chrome, Edge, dan Firefox (ekstensi + native messaging), tangkap papan klip
 - Unduh massal dari daftar URL, penyedot situs sederhana
 - Proksi (HTTP CONNECT, SOCKS5) dan autentikasi Basic/Digest; kata sandi hanya disimpan di keychain sistem operasi
+- Ikon baki sistem di Windows (menutup jendela tidak menghentikan unduhan)
 - Antarmuka bahasa Indonesia dan Inggris; tanpa telemetri
 
 UDM hanya mengunduh konten yang dapat Anda akses langsung. UDM tidak menangani DRM, aliran terenkripsi, paywall, atau captcha.

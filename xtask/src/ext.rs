@@ -21,7 +21,8 @@ pub fn manifest(browser: &str, version: &str) -> Value {
         "description": "UDM (Ubai Download Manager) browser integration",
         "permissions": ["contextMenus", "cookies", "downloads", "nativeMessaging", "storage"],
         "host_permissions": ["<all_urls>"],
-        "action": { "default_title": "UDM" },
+        "icons": icon_map(),
+        "action": { "default_title": "UDM", "default_icon": icon_map() },
         "content_security_policy": {
             "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
         },
@@ -41,6 +42,36 @@ pub fn manifest(browser: &str, version: &str) -> Value {
         }
     }
     m
+}
+
+/// Icon edges shipped with the extension.
+pub const ICON_SIZES: &[u16] = &[16, 32, 48, 128];
+
+fn icon_map() -> Value {
+    let mut m = serde_json::Map::new();
+    for s in ICON_SIZES {
+        m.insert(s.to_string(), json!(format!("icons/icon-{s}.png")));
+    }
+    Value::Object(m)
+}
+
+/// Render the UDM logo (`udm_core::logo`) as `icon-<size>.png` files in `dir`.
+pub fn write_logo_pngs(dir: &Path, sizes: &[u16]) -> Result<(), String> {
+    std::fs::create_dir_all(dir).map_err(|e| format!("cannot create {}: {e}", util::rel(dir)))?;
+    for &s in sizes {
+        let px = udm_core::logo::rgba(s).ok_or_else(|| format!("cannot render logo at {s}px"))?;
+        let path = dir.join(format!("icon-{s}.png"));
+        let mut bytes = Vec::new();
+        let mut enc = png::Encoder::new(&mut bytes, u32::from(s), u32::from(s));
+        enc.set_color(png::ColorType::Rgba);
+        enc.set_depth(png::BitDepth::Eight);
+        enc.write_header()
+            .and_then(|mut w| w.write_image_data(&px))
+            .map_err(|e| format!("cannot encode logo at {s}px: {e}"))?;
+        std::fs::write(&path, bytes)
+            .map_err(|e| format!("cannot write {}: {e}", util::rel(&path)))?;
+    }
+    Ok(())
 }
 
 pub fn workspace_version() -> Result<String, String> {
@@ -127,6 +158,7 @@ pub fn run() -> Result<(), String> {
             .arg(&wasm);
         util::run_status(bg)?;
         let copied = copy_dir(&glue, &out)?;
+        write_logo_pngs(&out.join("icons"), ICON_SIZES)?;
         let text = serde_json::to_string_pretty(&manifest(browser, &version))
             .map_err(|e| e.to_string())?;
         std::fs::write(out.join("manifest.json"), format!("{text}\n"))

@@ -26,6 +26,6 @@
 | Credentials only in the OS keychain | done | `no_secret_in_logs_or_state` |
 | Browser integration (Chrome, Edge, Firefox) | done | `hostile_ext_events_are_ignored`, `hostile_native_message_too_large`, `manifest_json_shape` |
 | Command line and scripting | done | `local_backend_runs_script_lines`, `cli_parses` |
-| Tray icon | todo | owner decision (dependency) |
+| Tray icon (show, pause all, resume all, quit; close to tray) | partial (Windows only) | `tray_labels_exist_in_both_locales`; manual check on Windows |
 | Installer and code signing | todo | owner decision; `cargo xtask dist` builds a folder |
 | DRM / stream ripping | won't do | — |

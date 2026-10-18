@@ -143,3 +143,5 @@ pub const MAX_COMMAND_ARGS: usize = 64;
 pub const MAX_ARG_STRING_BYTES: usize = 65_536;
 /// Maximum number of items in one list argument.
 pub const MAX_ARG_LIST_ITEMS: usize = 10_000;
+/// Largest application icon edge rendered by `logo` (Windows ICO maximum).
+pub const MAX_ICON_PX: u16 = 256;

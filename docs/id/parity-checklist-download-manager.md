@@ -26,6 +26,6 @@
 | Kredensial hanya di keychain sistem operasi | done | `no_secret_in_logs_or_state` |
 | Integrasi peramban (Chrome, Edge, Firefox) | done | `hostile_ext_events_are_ignored`, `hostile_native_message_too_large`, `manifest_json_shape` |
 | Baris perintah dan skrip | done | `local_backend_runs_script_lines`, `cli_parses` |
-| Ikon baki sistem | todo | keputusan pemilik (dependensi) |
+| Ikon baki sistem (tampilkan, jeda semua, lanjutkan semua, keluar; tutup ke baki) | partial (hanya Windows) | `tray_labels_exist_in_both_locales`; pemeriksaan manual di Windows |
 | Installer dan penandatanganan kode | todo | keputusan pemilik; `cargo xtask dist` membuat folder |
 | DRM / perekaman stream | won't do | — |

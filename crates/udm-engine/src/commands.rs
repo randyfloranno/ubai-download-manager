@@ -1083,6 +1083,7 @@ impl Engine {
                 st.clipboard_last = None;
             }
             "notify_on_complete" => s.notify_on_complete = parse_bool(value)?,
+            "close_to_tray" => s.close_to_tray = parse_bool(value)?,
             "capture_extensions" => {
                 let list: Vec<String> = value
                     .split([',', ' '])

@@ -38,6 +38,7 @@ COMMANDS:
     ctl <PORT> <JSON>  Send one control request to 127.0.0.1:PORT, print the response.
     licences           Write target/licences/THIRD-PARTY.md for all third-party crates.
     ext                Build the browser extension into extension/dist/{chrome,firefox}.
+    logo               Render the UDM logo as PNG files into target/logo/.
     dist               Release build + extension + licences into target/dist/udm-<version>-<os>-<arch>.
     help               Show this text.
 ";
@@ -61,6 +62,7 @@ fn main() -> ExitCode {
         "ctl" => ctl::run(rest),
         "licences" | "licenses" => licences::run(),
         "ext" => ext::run(),
+        "logo" => ext::write_logo_pngs(&util::root().join("target/logo"), &[16, 32, 48, 128, 256]),
         "dist" => dist::run(),
         "help" | "-h" | "--help" => {
             print!("{HELP}");

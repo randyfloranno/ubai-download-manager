@@ -21,6 +21,7 @@ use udm_i18n::{
 
 use crate::bridge::{Bridge, UiRequest};
 use crate::shot;
+use crate::tray::{Tray, TrayAction};
 
 const TOAST_SECS: u64 = 6;
 const MAX_TOASTS: usize = 5;
@@ -76,6 +77,7 @@ struct SettingsForm {
     limit_kib: u64,
     clipboard: bool,
     notify: bool,
+    close_to_tray: bool,
     subfolders: bool,
 }
 
@@ -145,6 +147,11 @@ pub struct UdmApp {
     selected: Option<String>,
     dialog: Option<Dialog>,
     toasts: Vec<Toast>,
+    tray: Option<Tray>,
+    /// Set when the app should really exit instead of hiding to the tray.
+    quitting: bool,
+    /// The "still running in the tray" notice was shown this session.
+    hidden_notice: bool,
 }
 
 fn locale_from_settings(s: &Settings) -> Locale {
@@ -209,11 +216,19 @@ impl UdmApp {
             selected: None,
             dialog: None,
             toasts: Vec::new(),
+            tray: None,
+            quitting: false,
+            hidden_notice: false,
         };
         for m in startup {
             app.toast_msg(&m, true);
         }
         app
+    }
+
+    /// Attaches the system tray icon (created on the UI thread).
+    pub fn attach_tray(&mut self, tray: Option<Tray>) {
+        self.tray = tray;
     }
 
     /// Active UI locale.
@@ -259,6 +274,9 @@ impl UdmApp {
     fn set_locale(&mut self, ctx: &egui::Context, l: Locale) {
         self.loc = Localizer::new(l);
         ctx.send_viewport_cmd(ViewportCommand::Title(self.tr("app-title")));
+        if let Some(t) = &self.tray {
+            t.relabel(&self.loc);
+        }
         self.run(
             "settings.set",
             json!({ "name": "locale", "value": locale_tag(l) }),
@@ -400,7 +418,10 @@ impl UdmApp {
             }
             EngineEvent::Failed { message, .. } => self.toast_msg(&message, true),
             EngineEvent::Notice { message, .. } => self.toast_msg(&message, false),
-            EngineEvent::ExitRequested => ctx.send_viewport_cmd(ViewportCommand::Close),
+            EngineEvent::ExitRequested => {
+                self.quitting = true;
+                ctx.send_viewport_cmd(ViewportCommand::Close);
+            }
             EngineEvent::ClipboardLinks(links) => {
                 if self.dialog.is_none() && !links.is_empty() {
                     self.dialog = Some(Dialog::Captured(links));
@@ -470,6 +491,7 @@ impl UdmApp {
                 limit_kib: kib_of(s.global_speed_limit),
                 clipboard: s.clipboard_capture,
                 notify: s.notify_on_complete,
+                close_to_tray: s.close_to_tray,
                 subfolders: s.category_subfolders,
             })),
             "schedule" => {
@@ -1002,9 +1024,67 @@ impl UdmApp {
     }
 }
 
+impl UdmApp {
+    /// Tray actions, tooltip, and hiding to the tray instead of closing.
+    fn tray_tick(&mut self, ctx: &egui::Context) {
+        let Some(tray) = &mut self.tray else {
+            return;
+        };
+        let actions = tray.actions();
+        let stats = self.engine.stats();
+        let status = self.loc.tr_args(
+            "ui-status-bar",
+            &[
+                ("active", TrArg::Num(stats.active)),
+                ("total", TrArg::Num(stats.total)),
+                (
+                    "speed",
+                    TrArg::Str(format_speed(self.loc.locale(), stats.speed).into()),
+                ),
+            ],
+        );
+        tray.set_tooltip(format!(
+            "{}
+{status}",
+            self.loc.tr("app-title")
+        ));
+        for a in actions {
+            match a {
+                TrayAction::Show => {
+                    ctx.send_viewport_cmd(ViewportCommand::Visible(true));
+                    ctx.send_viewport_cmd(ViewportCommand::Minimized(false));
+                    ctx.send_viewport_cmd(ViewportCommand::Focus);
+                }
+                TrayAction::PauseAll => self.run("download.pause_all", json!({})),
+                TrayAction::ResumeAll => self.run("download.resume_all", json!({})),
+                TrayAction::Quit => {
+                    self.quitting = true;
+                    ctx.send_viewport_cmd(ViewportCommand::Close);
+                }
+            }
+        }
+        let close = ctx.input(|i| i.viewport().close_requested());
+        if close && !self.quitting && self.engine.settings().close_to_tray {
+            ctx.send_viewport_cmd(ViewportCommand::CancelClose);
+            ctx.send_viewport_cmd(ViewportCommand::Visible(false));
+            if !self.hidden_notice {
+                self.hidden_notice = true;
+                let title = self.tr("app-title");
+                let body = self.tr("ui-tray-still-running");
+                self.rt.spawn_blocking(move || {
+                    if let Err(e) = udm_sys::notify(&title, &body) {
+                        tracing::debug!("notification failed: {e:?}");
+                    }
+                });
+            }
+        }
+    }
+}
+
 impl eframe::App for UdmApp {
     fn logic(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         self.poll(ctx);
+        self.tray_tick(ctx);
     }
 
     fn ui(&mut self, ui: &mut Ui, _frame: &mut eframe::Frame) {
@@ -1242,6 +1322,11 @@ fn settings_dialog(ui: &mut Ui, loc: &Localizer, f: &mut SettingsForm) -> Outcom
             ui.label("");
             ui.checkbox(&mut f.notify, loc.tr("ui-settings-notify"));
             ui.end_row();
+            if cfg!(windows) {
+                ui.label("");
+                ui.checkbox(&mut f.close_to_tray, loc.tr("ui-settings-close-to-tray"));
+                ui.end_row();
+            }
         });
     let (ok, cancel) = buttons(ui, loc, "ui-btn-save", !f.download_dir.trim().is_empty());
     let mut out = Outcome {
@@ -1257,6 +1342,7 @@ fn settings_dialog(ui: &mut Ui, loc: &Localizer, f: &mut SettingsForm) -> Outcom
             set("max_concurrent", f.max_concurrent.to_string()),
             set("category_subfolders", f.subfolders.to_string()),
             set("notify_on_complete", f.notify.to_string()),
+            set("close_to_tray", f.close_to_tray.to_string()),
             (
                 "capture.clipboard_toggle",
                 json!({ "enabled": f.clipboard }),
