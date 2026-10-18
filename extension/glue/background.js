@@ -27,11 +27,11 @@ async function nativeSend(message) {
   }
 }
 
-// Returns true when UDM took the download over.
+// Returns the shown reply ({captured, badge, text}), or null when not captured.
 async function forward(event) {
   await ready;
   const decision = JSON.parse(udm.decide(await settingsJson(), JSON.stringify(event)));
-  if (decision.action !== "capture") return false;
+  if (decision.action !== "capture") return null;
   const message = decision.message;
   const cookie = await cookiesFor(decision.cookie_url);
   if (cookie) message.cookie = cookie;
@@ -39,7 +39,7 @@ async function forward(event) {
   const shown = JSON.parse(udm.reply(lang(), JSON.stringify(reply ?? null)));
   await api.action.setBadgeText({ text: shown.badge });
   await api.action.setTitle({ title: shown.text });
-  return shown.captured;
+  return shown;
 }
 
 async function createMenus() {
@@ -56,7 +56,7 @@ api.contextMenus.onClicked.addListener((info) => {
 });
 
 api.downloads.onCreated.addListener(async (item) => {
-  if (await forward({ kind: "download", item })) {
+  if ((await forward({ kind: "download", item }))?.captured) {
     try {
       await api.downloads.cancel(item.id);
       await api.downloads.erase({ id: item.id });
@@ -64,4 +64,20 @@ api.downloads.onCreated.addListener(async (item) => {
       // The browser may already have finished a tiny download.
     }
   }
+});
+
+// On-page media button (content.js): "probe" asks whether to show it (the
+// label, or null); "click" captures and answers with the reply text.
+async function probe(event) {
+  await ready;
+  const decision = JSON.parse(udm.decide(await settingsJson(), JSON.stringify(event)));
+  return decision.action === "capture" ? udm.media_label(lang()) : null;
+}
+
+api.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  const media = { src: msg?.src, page: sender.tab?.url, frame: sender.url };
+  const event = { kind: "media", media };
+  const run = msg?.udm === "media-click" ? forward(event).then((s) => s?.text ?? null) : probe(event);
+  run.then(sendResponse, () => sendResponse(null));
+  return true;
 });

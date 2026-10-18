@@ -42,3 +42,9 @@ pub fn reply(locale: &str, reply_json: &str) -> String {
 pub fn menus(locale: &str) -> String {
     capture::menus(locale).to_string()
 }
+
+/// Label of the on-page media button.
+#[wasm_bindgen]
+pub fn media_label(locale: &str) -> String {
+    capture::media_label(locale)
+}

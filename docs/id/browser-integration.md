@@ -6,6 +6,7 @@ Ekstensi UDM (Chrome, Edge, Firefox) menyerahkan unduhan dan tautan ke UDM melal
 
 - **Unduhan yang dimulai peramban**, bila penangkapan aktif, ekstensi berkas ada dalam daftar (arsip, program, citra cakram, video, audio, dokumen) dan ukurannya tidak diketahui atau minimal 1 MiB.
 - **Klik kanan → "Unduh tautan dengan UDM"** pada tautan, dan **"Unduh media ini dengan UDM"** pada elemen video, audio, atau gambar yang sumbernya URL berkas langsung.
+- **Tombol "Unduh dengan UDM"** di atas `<video>`/`<audio>` yang sedang diputar bila sumbernya berkas media langsung (mp4, webm, mkv, mp3, m4a, flac, …). Tombol ini tidak pernah muncul di platform streaming (YouTube, Netflix, Twitch, Vimeo, Spotify, …), untuk sumber `blob:` (aliran adaptif), atau untuk manifes aliran (`.m3u8`, `.mpd`). Matikan dengan `"media_button": false` di pengaturan ekstensi.
 - Hanya URL `http`, `https`, dan `ftp` tanpa kredensial di dalamnya. URL `blob:` dan `data:`, stream terenkripsi, dan media ber-DRM tidak pernah ditangkap.
 
 Cookie hanya dikirim untuk URL yang ditangkap, dibaca dari peramban saat penangkapan, dan disimpan UDM di keychain sistem operasi. UDM tidak pernah membaca berkas profil peramban.

@@ -382,6 +382,7 @@ error-cli-register-reg = Tidak dapat memperbarui registri Windows.
 ## Ekstensi peramban
 ext-menu-link = Unduh tautan dengan UDM
 ext-menu-media = Unduh media ini dengan UDM
+ext-media-button = Unduh dengan UDM
 ext-sent = Dikirim ke UDM.
 ext-host-missing = UDM belum terpasang atau penghubung perambannya belum terdaftar.
 ext-reply-invalid = UDM mengirim jawaban yang tidak dipahami ekstensi ini.

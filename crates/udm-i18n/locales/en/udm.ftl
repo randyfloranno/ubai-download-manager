@@ -382,6 +382,7 @@ error-cli-register-reg = Cannot update the Windows registry.
 ## Browser extension
 ext-menu-link = Download link with UDM
 ext-menu-media = Download this media with UDM
+ext-media-button = Download with UDM
 ext-sent = Sent to UDM.
 ext-host-missing = UDM is not installed or its browser connector is not registered.
 ext-reply-invalid = UDM sent an answer this extension does not understand.

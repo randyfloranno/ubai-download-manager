@@ -26,6 +26,18 @@ pub fn manifest(browser: &str, version: &str) -> Value {
         "content_security_policy": {
             "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self'"
         },
+        // Media button. Streaming platforms do not even load it; the Rust core
+        // (`udm_ext::capture::NEVER_MEDIA_HOSTS`) refuses them again regardless.
+        "content_scripts": [{
+            "matches": ["http://*/*", "https://*/*"],
+            "exclude_matches": STREAM_SITES
+                .iter()
+                .flat_map(|d| [format!("*://{d}/*"), format!("*://*.{d}/*")])
+                .collect::<Vec<_>>(),
+            "js": ["content.js"],
+            "all_frames": true,
+            "run_at": "document_idle"
+        }],
     });
     let background = if browser == "firefox" {
         json!({ "scripts": ["background.js"], "type": "module" })
@@ -43,6 +55,19 @@ pub fn manifest(browser: &str, version: &str) -> Value {
     }
     m
 }
+
+/// Sites the media content script never runs on (no stream ripping, AGENTS.md §5.3).
+const STREAM_SITES: &[&str] = &[
+    "youtube.com",
+    "youtube-nocookie.com",
+    "youtu.be",
+    "netflix.com",
+    "primevideo.com",
+    "disneyplus.com",
+    "spotify.com",
+    "twitch.tv",
+    "vimeo.com",
+];
 
 /// Icon edges shipped with the extension.
 pub const ICON_SIZES: &[u16] = &[16, 32, 48, 128];
@@ -197,5 +222,10 @@ mod tests {
                 .contains("wasm-unsafe-eval")
         );
         assert_eq!(f["version"], "0.1.0");
+        let cs = &c["content_scripts"][0];
+        assert_eq!(cs["js"][0], "content.js");
+        let excluded = cs["exclude_matches"].as_array().unwrap();
+        assert!(excluded.contains(&json!("*://*.youtube.com/*")));
+        assert!(excluded.contains(&json!("*://youtu.be/*")));
     }
 }

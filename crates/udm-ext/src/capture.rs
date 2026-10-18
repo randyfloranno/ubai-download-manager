@@ -22,6 +22,30 @@ const DEFAULT_EXTENSIONS: &[&str] = &[
     "rpm", "appimage", "apk", "mp4", "mkv", "avi", "mov", "webm", "mp3", "flac", "wav", "m4a",
     "ogg", "pdf", "epub", "doc", "docx", "xls", "xlsx", "ppt", "pptx",
 ];
+/// File types the on-page media button offers (direct files only).
+const MEDIA_EXTENSIONS: &[&str] = &[
+    "mp4", "m4v", "webm", "mkv", "mov", "avi", "ogv", "mp3", "m4a", "ogg", "oga", "opus", "flac",
+    "wav", "aac",
+];
+/// Streaming manifests are never offered: they are not files (AGENTS.md §5.3).
+const STREAM_MANIFESTS: &[&str] = &["m3u8", "m3u", "mpd", "ism", "f4m"];
+/// Streaming platforms the media button never appears on (no stream ripping,
+/// AGENTS.md §5.3). Matched against the page and the media host, with sub-domains.
+pub const NEVER_MEDIA_HOSTS: &[&str] = &[
+    "youtube.com",
+    "youtube-nocookie.com",
+    "youtu.be",
+    "googlevideo.com",
+    "netflix.com",
+    "nflxvideo.net",
+    "primevideo.com",
+    "disneyplus.com",
+    "spotify.com",
+    "twitch.tv",
+    "ttvnw.net",
+    "vimeo.com",
+    "vimeocdn.com",
+];
 /// Downloads smaller than this are left to the browser by default (1 MiB).
 const DEFAULT_MIN_SIZE_BYTES: u64 = 1_048_576;
 
@@ -37,6 +61,8 @@ pub struct Settings {
     pub extensions: Vec<String>,
     /// Hosts never intercepted (exact match, lower case).
     pub skip_hosts: Vec<String>,
+    /// Show the "Download with UDM" button over playing media files.
+    pub media_button: bool,
 }
 
 impl Default for Settings {
@@ -46,6 +72,7 @@ impl Default for Settings {
             min_size_bytes: DEFAULT_MIN_SIZE_BYTES,
             extensions: DEFAULT_EXTENSIONS.iter().map(|s| (*s).to_owned()).collect(),
             skip_hosts: Vec::new(),
+            media_button: true,
         }
     }
 }
@@ -214,8 +241,59 @@ fn decide_menu(info: &Map<String, Value>) -> Decision {
     }
 }
 
+/// `host` is `domain` or one of its sub-domains.
+fn host_in(host: &str, domain: &str) -> bool {
+    host == domain
+        || host
+            .strip_suffix(domain)
+            .is_some_and(|rest| rest.ends_with('.'))
+}
+
+fn never_media_host(url: &Url) -> bool {
+    let host = url.host_str().unwrap_or_default().to_ascii_lowercase();
+    NEVER_MEDIA_HOSTS.iter().any(|d| host_in(&host, d))
+}
+
+/// A playing `<video>`/`<audio>` element: offered only when its source is a
+/// direct media file the page already exposes. `blob:`/`data:` sources (Media
+/// Source Extensions, i.e. adaptive streams), manifests and streaming platforms
+/// are refused.
+fn decide_media(s: &Settings, media: &Map<String, Value>) -> Decision {
+    if !s.media_button {
+        return Decision::Ignore("disabled");
+    }
+    // `page` is the tab, `frame` the document holding the element (an iframe).
+    let page = str_field(media, "page", limits::MAX_URL_BYTES).and_then(capturable);
+    let frame = str_field(media, "frame", limits::MAX_URL_BYTES).and_then(capturable);
+    if page.iter().chain(frame.iter()).any(never_media_host) {
+        return Decision::Ignore("stream-site");
+    }
+    let referer = frame.as_ref().or(page.as_ref()).map(Url::as_str);
+    let Some(url) = str_field(media, "src", limits::MAX_URL_BYTES).and_then(capturable) else {
+        return Decision::Ignore("url");
+    };
+    if never_media_host(&url) {
+        return Decision::Ignore("stream-site");
+    }
+    let host = url.host_str().unwrap_or_default().to_ascii_lowercase();
+    if s.skip_hosts.contains(&host) {
+        return Decision::Ignore("skip-host");
+    }
+    let name = udm_proto::filename_from_url(&url);
+    let ext = name.as_deref().and_then(udm_proto::extension);
+    match ext.as_deref() {
+        Some(e) if STREAM_MANIFESTS.contains(&e) => Decision::Ignore("manifest"),
+        Some(e) if MEDIA_EXTENSIONS.contains(&e) => Decision::Capture {
+            message: capture_message(&url, name.as_deref(), referer, None),
+            cookie_url: url.as_str().to_owned(),
+        },
+        _ => Decision::Ignore("extension"),
+    }
+}
+
 /// Decides on one event: `{"kind":"download","item":{...}}` (a `downloads.onCreated`
-/// item) or `{"kind":"menu","info":{...}}` (a `contextMenus.onClicked` info).
+/// item), `{"kind":"menu","info":{...}}` (a `contextMenus.onClicked` info) or
+/// `{"kind":"media","media":{"src":...,"page":...}}` (the on-page media button).
 pub fn decide(settings: &Settings, event_json: &str) -> Decision {
     if event_json.len() > limits::MAX_NATIVE_MESSAGE_BYTES {
         return Decision::Ignore("too-large");
@@ -227,6 +305,10 @@ pub fn decide(settings: &Settings, event_json: &str) -> Decision {
     match (kind, ev.get("item"), ev.get("info")) {
         (Some("download"), Some(Value::Object(item)), _) => decide_download(settings, item),
         (Some("menu"), _, Some(Value::Object(info))) => decide_menu(info),
+        (Some("media"), _, _) => match ev.get("media") {
+            Some(Value::Object(media)) => decide_media(settings, media),
+            _ => Decision::Ignore("kind"),
+        },
         _ => Decision::Ignore("kind"),
     }
 }
@@ -325,6 +407,11 @@ pub fn reply(locale_tag: &str, reply_json: &str) -> Value {
     };
     let badge = if captured { "" } else { "!" };
     json!({ "captured": captured, "badge": badge, "text": loc.message(&msg) })
+}
+
+/// Label of the on-page media button.
+pub fn media_label(locale_tag: &str) -> String {
+    Localizer::new(Locale::parse(locale_tag).unwrap_or_default()).tr("ext-media-button")
 }
 
 /// Context-menu titles for the browser UI language.
@@ -453,6 +540,104 @@ mod tests {
         };
         assert!(message.get("referer").is_none());
         assert!(message.get("file_name").is_none());
+    }
+
+    fn media(src: &str, page: &str) -> String {
+        json!({ "kind": "media", "media": { "src": src, "page": page } }).to_string()
+    }
+
+    #[test]
+    fn direct_media_files_are_offered() {
+        let s = Settings::default();
+        let Decision::Capture { message, .. } = decide(
+            &s,
+            &media(
+                "https://cdn.example/clips/talk.mp4?t=1",
+                "https://news.example/a",
+            ),
+        ) else {
+            panic!()
+        };
+        assert_eq!(message["url"], "https://cdn.example/clips/talk.mp4?t=1");
+        assert_eq!(message["file_name"], "talk.mp4");
+        assert_eq!(message["referer"], "https://news.example/a");
+        assert!(matches!(
+            decide(&s, &media("https://h/song.MP3", "https://h/")),
+            Decision::Capture { .. }
+        ));
+        let off = Settings {
+            media_button: false,
+            ..Settings::default()
+        };
+        assert_eq!(
+            decide(&off, &media("https://h/v.mp4", "https://h/")),
+            Decision::Ignore("disabled")
+        );
+        assert!(media_label("id").contains("UDM"));
+        assert_ne!(media_label("en"), media_label("id"));
+    }
+
+    #[test]
+    fn hostile_ext_media_streams_and_streaming_sites_are_refused() {
+        let s = Settings::default();
+        for (src, page, why) in [
+            // Media Source Extensions (adaptive streaming, e.g. YouTube).
+            (
+                "blob:https://www.youtube.com/0b1c",
+                "https://www.youtube.com/watch?v=x",
+                "stream-site",
+            ),
+            ("blob:https://h.example/0b1c", "https://h.example/", "url"),
+            ("data:video/mp4;base64,AAAA", "https://h/", "url"),
+            (
+                "https://rr1---sn.googlevideo.com/videoplayback.mp4",
+                "https://h/",
+                "stream-site",
+            ),
+            (
+                "https://cdn.example/v.mp4",
+                "https://m.youtube.com/watch?v=x",
+                "stream-site",
+            ),
+            (
+                "https://cdn.example/v.mp4",
+                "https://youtu.be/x",
+                "stream-site",
+            ),
+            ("https://h/live/index.m3u8", "https://h/", "manifest"),
+            ("https://h/dash/manifest.mpd", "https://h/", "manifest"),
+            ("https://h/page.html", "https://h/", "extension"),
+            ("https://h/watch?id=1", "https://h/", "extension"),
+            ("https://user:pw@h/v.mp4", "https://h/", "url"),
+        ] {
+            assert_eq!(
+                decide(&s, &media(src, page)),
+                Decision::Ignore(why),
+                "{src}"
+            );
+        }
+        // Look-alike hosts are not streaming platforms.
+        assert!(matches!(
+            decide(
+                &s,
+                &media("https://notyoutube.com/v.mp4", "https://notyoutube.com/")
+            ),
+            Decision::Capture { .. }
+        ));
+        let long = format!("https://h/{}.mp4", "a".repeat(limits::MAX_URL_BYTES));
+        assert_eq!(
+            decide(&s, &media(&long, "https://h/")),
+            Decision::Ignore("url")
+        );
+        // A YouTube embed on another site is refused through its frame URL.
+        let embed = json!({ "kind": "media", "media": { "src": "https://cdn.example/v.mp4",
+            "page": "https://news.example/", "frame": "https://www.youtube-nocookie.com/embed/x" } });
+        assert_eq!(
+            decide(&s, &embed.to_string()),
+            Decision::Ignore("stream-site")
+        );
+        let no_media = json!({ "kind": "media", "media": "x" }).to_string();
+        assert_eq!(decide(&s, &no_media), Decision::Ignore("kind"));
     }
 
     #[test]

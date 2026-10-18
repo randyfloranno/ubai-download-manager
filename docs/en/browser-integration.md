@@ -6,6 +6,7 @@ The UDM extension (Chrome, Edge, Firefox) hands downloads and links to UDM throu
 
 - **Downloads the browser starts**, when interception is on, the file extension is in the list (archives, programs, disk images, video, audio, documents) and the size is unknown or at least 1 MiB.
 - **Right-click → "Download link with UDM"** on a link, and **"Download this media with UDM"** on a video, audio or image element whose source is a direct file URL.
+- **"Download with UDM" button** over a playing `<video>`/`<audio>` whose source is a direct media file (mp4, webm, mkv, mp3, m4a, flac, …). It never appears on streaming platforms (YouTube, Netflix, Twitch, Vimeo, Spotify, …), for `blob:` sources (adaptive streams) or for stream manifests (`.m3u8`, `.mpd`). Turn it off with `"media_button": false` in the extension settings.
 - Only `http`, `https` and `ftp` URLs without embedded credentials. `blob:` and `data:` URLs, encrypted streams and DRM-protected media are never captured.
 
 Cookies are sent only for the captured URL, read from the browser at the moment of capture, and stored by UDM in the OS keychain. UDM never reads browser profile files.
